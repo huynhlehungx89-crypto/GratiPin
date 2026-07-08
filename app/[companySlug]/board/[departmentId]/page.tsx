@@ -2,14 +2,13 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Board } from "@/components/board/Board";
 import { BoardNav } from "@/components/board/BoardNav";
-import { CreatePinForm } from "@/components/pin/CreatePinForm";
-import { PinCard } from "@/components/pin/PinCard";
+import { BoardPageLayout } from "@/components/board/BoardPageLayout";
+import { BoardPinLayer } from "@/components/board/BoardPinLayer";
 import type { BoardSkin } from "@/lib/utils/board";
 import {
   getAccessibleBoards,
   getBoardPins,
   getCompanyBySlug,
-  getCompanyMembers,
   getCurrentMember,
 } from "@/lib/data/board";
 
@@ -56,7 +55,6 @@ export default async function DepartmentBoardPage({
   );
 
   const pins = await getBoardPins(board.id, isAdmin);
-  const members = await getCompanyMembers(company.id);
 
   const navItems = [
     {
@@ -77,26 +75,18 @@ export default async function DepartmentBoardPage({
     }),
   ];
 
-  const boardOptions = navItems.map((n) => ({ id: n.id, label: n.label }));
-
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="font-heading text-2xl text-umber mb-4">{dept?.name}</h1>
-      <BoardNav items={navItems} currentId={board.id} />
-      <CreatePinForm
-        companySlug={params.companySlug}
-        boards={boardOptions}
-        members={members.map((m) => ({ id: m.id, name: m.display_name }))}
-        defaultBoardId={board.id}
-        disabled={archived}
-      />
-      <Board skin={board.skin as BoardSkin} archived={archived}>
-        {pins
-          .filter((p) => !p.is_hidden)
-          .map((pin) => (
-            <PinCard key={pin.id} pin={pin} companyLogoUrl={company.logo_url} />
-          ))}
-      </Board>
-    </main>
+    <BoardPageLayout
+      title={dept?.name}
+      nav={<BoardNav items={navItems} currentId={board.id} />}
+      board={
+        <Board skin={board.skin as BoardSkin} archived={archived}>
+          <BoardPinLayer
+            pins={pins.filter((p) => !p.is_hidden)}
+            companyLogoUrl={company.logo_url}
+          />
+        </Board>
+      }
+    />
   );
 }

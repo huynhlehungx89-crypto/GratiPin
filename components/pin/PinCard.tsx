@@ -16,8 +16,11 @@ export type PinDisplay = {
   created_at: string;
   author_name: string;
   author_real_name?: string;
-  recipient_name?: string | null;
   show_real_author?: boolean;
+  recipient_name?: string | null;
+  position_x: number;
+  position_y: number;
+  rotation: number;
 };
 
 const TEMPLATE_STYLES: Record<PinTemplate, string> = {

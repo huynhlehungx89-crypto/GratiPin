@@ -1,6 +1,6 @@
 import type { BoardSkin, PinTemplate } from "@/lib/utils/board";
 import { Board } from "@/components/board/Board";
-import { PinCard } from "@/components/pin/PinCard";
+import { BoardPinLayer } from "@/components/board/BoardPinLayer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PinDisplay } from "@/components/pin/PinCard";
 
@@ -31,6 +31,7 @@ export default async function EmbedBoardPage({
     .from("pins")
     .select(
       `id, content, template, image_url, is_anonymous, is_hidden, created_at,
+       position_x, position_y, rotation,
        author:members!pins_author_member_id_fkey(display_name),
        recipient:members!pins_recipient_member_id_fkey(display_name)`
     )
@@ -52,15 +53,16 @@ export default async function EmbedBoardPage({
       created_at: pin.created_at,
       author_name: pin.is_anonymous ? "Ẩn danh" : (author?.display_name ?? "—"),
       recipient_name: recipient?.display_name ?? null,
+      position_x: pin.position_x,
+      position_y: pin.position_y,
+      rotation: pin.rotation,
     };
   });
 
   return (
-    <main className="min-h-screen bg-cream p-4">
+    <main className="h-screen bg-cream">
       <Board skin={board.skin as BoardSkin}>
-        {displayPins.map((pin) => (
-          <PinCard key={pin.id} pin={pin} companyLogoUrl={company?.logo_url} canShare={false} />
-        ))}
+        <BoardPinLayer pins={displayPins} companyLogoUrl={company?.logo_url ?? null} />
       </Board>
     </main>
   );

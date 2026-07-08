@@ -73,6 +73,7 @@ export async function getBoardPins(
     .select(
       `
       id, content, template, image_url, is_anonymous, is_hidden, created_at,
+      position_x, position_y, rotation,
       author:members!pins_author_member_id_fkey(display_name),
       recipient:members!pins_recipient_member_id_fkey(display_name)
     `
@@ -95,6 +96,9 @@ export async function getBoardPins(
       author_real_name: author?.display_name,
       recipient_name: recipient?.display_name ?? null,
       show_real_author: isAdmin && pin.is_anonymous,
+      position_x: pin.position_x ?? 0,
+      position_y: pin.position_y ?? 0,
+      rotation: pin.rotation ?? 0,
     };
   });
 }

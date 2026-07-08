@@ -32,8 +32,8 @@ export default async function CompanyLayout({
   const isAdmin = member?.role === "admin";
 
   return (
-    <div className="min-h-screen bg-cream">
-      <header className="border-b border-umber/10 bg-white/60 px-4 py-3 backdrop-blur-sm">
+    <div className="flex min-h-screen flex-col bg-cream">
+      <header className="shrink-0 border-b border-umber/10 bg-white/60 px-4 py-3 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {company?.logo_url && (
@@ -86,7 +86,7 @@ export default async function CompanyLayout({
           </nav>
         </div>
       </header>
-      {children}
+      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }

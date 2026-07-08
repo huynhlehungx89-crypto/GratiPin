@@ -1,14 +1,13 @@
 import { notFound } from "next/navigation";
 import { Board } from "@/components/board/Board";
 import { BoardNav } from "@/components/board/BoardNav";
-import { CreatePinForm } from "@/components/pin/CreatePinForm";
-import { PinCard } from "@/components/pin/PinCard";
+import { BoardPageLayout } from "@/components/board/BoardPageLayout";
+import { BoardPinLayer } from "@/components/board/BoardPinLayer";
 import type { BoardSkin } from "@/lib/utils/board";
 import {
   getAccessibleBoards,
   getBoardPins,
   getCompanyBySlug,
-  getCompanyMembers,
   getCurrentMember,
 } from "@/lib/data/board";
 
@@ -33,7 +32,6 @@ export default async function CompanyBoardPage({
   if (!companyBoard) notFound();
 
   const pins = await getBoardPins(companyBoard.id, isAdmin);
-  const members = await getCompanyMembers(company.id);
 
   const navItems = [
     {
@@ -54,32 +52,17 @@ export default async function CompanyBoardPage({
     }),
   ];
 
-  const boardOptions = navItems.map((n) => ({ id: n.id, label: n.label }));
-
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <BoardNav items={navItems} currentId={companyBoard.id} />
-      <CreatePinForm
-        companySlug={params.companySlug}
-        boards={boardOptions}
-        members={members.map((m) => ({ id: m.id, name: m.display_name }))}
-        defaultBoardId={companyBoard.id}
-      />
-      <Board skin={companyBoard.skin as BoardSkin}>
-        {pins
-          .filter((p) => !p.is_hidden)
-          .map((pin) => (
-            <PinCard
-              key={pin.id}
-              pin={pin}
-              companyLogoUrl={company.logo_url}
-              canShare={!pin.is_hidden}
-            />
-          ))}
-        {pins.length === 0 && (
-          <p className="text-umber/60">Chưa có ghim nào — hãy là người đầu tiên!</p>
-        )}
-      </Board>
-    </main>
+    <BoardPageLayout
+      nav={<BoardNav items={navItems} currentId={companyBoard.id} />}
+      board={
+        <Board skin={companyBoard.skin as BoardSkin}>
+          <BoardPinLayer
+            pins={pins.filter((p) => !p.is_hidden)}
+            companyLogoUrl={company.logo_url}
+          />
+        </Board>
+      }
+    />
   );
 }
