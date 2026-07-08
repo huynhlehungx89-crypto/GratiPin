@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   description: "Nền tảng ghi nhận, biết ơn và lưu giữ kỷ niệm công ty",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
