@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import { Inter, Quicksand } from "next/font/google";
+import "./globals.css";
+
+const quicksand = Quicksand({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "GratiPin",
+  description: "Nền tảng ghi nhận, biết ơn và lưu giữ kỷ niệm công ty",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="vi">
+      <body className={`${quicksand.variable} ${inter.variable} font-body antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
+}
