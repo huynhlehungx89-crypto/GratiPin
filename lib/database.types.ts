@@ -216,7 +216,10 @@ export type Database = {
           image_url: string | null
           is_anonymous: boolean
           is_hidden: boolean
+          position_x: number
+          position_y: number
           recipient_member_id: string | null
+          rotation: number
           template: string
         }
         Insert: {
@@ -229,7 +232,10 @@ export type Database = {
           image_url?: string | null
           is_anonymous?: boolean
           is_hidden?: boolean
+          position_x?: number
+          position_y?: number
           recipient_member_id?: string | null
+          rotation?: number
           template?: string
         }
         Update: {
@@ -242,7 +248,10 @@ export type Database = {
           image_url?: string | null
           is_anonymous?: boolean
           is_hidden?: boolean
+          position_x?: number
+          position_y?: number
           recipient_member_id?: string | null
+          rotation?: number
           template?: string
         }
         Relationships: [
