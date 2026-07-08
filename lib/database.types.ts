@@ -291,6 +291,10 @@ export type Database = {
     }
     Functions: {
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
+      update_pin_position: {
+        Args: { pin_id: string; rot: number; x: number; y: number }
+        Returns: undefined
+      }
       user_company_ids: { Args: never; Returns: string[] }
     }
     Enums: {
