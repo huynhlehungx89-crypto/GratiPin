@@ -67,7 +67,7 @@ export default async function CompanyBoardPage({
       />
       <Board skin={companyBoard.skin as BoardSkin}>
         {pins
-          .filter((p) => !p.is_hidden || isAdmin)
+          .filter((p) => !p.is_hidden)
           .map((pin) => (
             <PinCard
               key={pin.id}

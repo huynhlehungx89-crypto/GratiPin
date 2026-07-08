@@ -92,7 +92,7 @@ export default async function DepartmentBoardPage({
       />
       <Board skin={board.skin as BoardSkin} archived={archived}>
         {pins
-          .filter((p) => !p.is_hidden || isAdmin)
+          .filter((p) => !p.is_hidden)
           .map((pin) => (
             <PinCard key={pin.id} pin={pin} companyLogoUrl={company.logo_url} />
           ))}

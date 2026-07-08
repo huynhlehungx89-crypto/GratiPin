@@ -1,0 +1,138 @@
+import { test, expect } from "@playwright/test";
+import {
+  SEED_PASSWORD,
+  USERS,
+  testRlsIsolation,
+  enableEmbedForCompanyBoard,
+  cleanupE2eCompany,
+  createCompanyViaApi,
+} from "./helpers";
+
+function pinOnBoard(page: import("@playwright/test").Page, content: string) {
+  return page.locator('[class*="min-h-[480px]"] article').filter({ hasText: content });
+}
+
+async function login(page: import("@playwright/test").Page, email: string) {
+  await page.goto("/login");
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(SEED_PASSWORD);
+  await page.getByRole("button", { name: "Đăng nhập" }).click();
+}
+
+test.describe("GratiPin E2E", () => {
+  const e2eSlugPrefix = "e2e-test";
+
+  test.afterAll(async () => {
+    await cleanupE2eCompany(e2eSlugPrefix);
+  });
+
+  test("E2E-01: Trang chủ hiển thị đúng", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "GratiPin" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Tạo công ty mới" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Đăng nhập" })).toBeVisible();
+  });
+
+  test("E2E-02: Đăng nhập admin → vào bảng chung", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+    await expect(page.getByRole("heading", { name: "Đăng ghim mới" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Bảng chung/ })).toBeVisible();
+  });
+
+  test("E2E-03: RLS — user khác company không thấy dữ liệu chéo", async () => {
+    const { pass, userASlugs, userBSlugs } = await testRlsIsolation();
+    expect(pass, `A=${userASlugs.join()}, B=${userBSlugs.join()}`).toBe(true);
+  });
+
+  test("E2E-04: Middleware — user B không vào được board công ty A", async ({ page }) => {
+    await login(page, USERS.userB1.email);
+    await page.waitForURL(`**/${USERS.userB1.slug}/board**`);
+    const res = await page.goto(`/${USERS.adminA.slug}/board`);
+    expect(res?.status()).toBe(404);
+  });
+
+  test("E2E-05: Đăng ký công ty mới → login → board rỗng", async ({ page }) => {
+    const unique = Date.now();
+    const slug = `${e2eSlugPrefix}-${unique}`;
+    const email = `e2e-admin-${unique}@gratipin.test`;
+
+    await createCompanyViaApi({
+      slug,
+      name: `E2E Test ${unique}`,
+      email,
+      displayName: "E2E Admin",
+    });
+
+    await login(page, email);
+    await page.waitForURL(`**/${slug}/board**`);
+    await expect(page.getByText("Chưa có ghim nào")).toBeVisible();
+  });
+
+  test("E2E-06: Tạo ghim trên bảng chung", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+
+    const pinContent = `E2E ghim ${Date.now()}`;
+    await page.getByPlaceholder("Viết lời biết ơn").fill(pinContent);
+    await page.getByRole("button", { name: "Đăng ghim" }).click();
+    await page.waitForLoadState("networkidle");
+    await expect(pinOnBoard(page, pinContent).first()).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("E2E-07: Admin tạo phòng ban", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+
+    await page.goto(`/${USERS.adminA.slug}/admin/departments`);
+    const deptName = `Phòng E2E ${Date.now()}`;
+    await page.getByPlaceholder("Tên phòng ban").fill(deptName);
+    await page.getByRole("button", { name: "Tạo" }).click();
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByText(deptName)).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("E2E-08: Connecta admin — user thường nhận 404", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+    const res = await page.goto("/connecta-admin");
+    expect(res?.status()).toBe(404);
+  });
+
+  test("E2E-09: Embed board read-only với token hợp lệ", async ({ page }) => {
+    const { boardId, token } = await enableEmbedForCompanyBoard(USERS.adminA.slug);
+    const res = await page.goto(`/embed/${boardId}?token=${token}`);
+    expect(res?.status()).toBe(200);
+    await expect(page.locator("main")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Đăng ghim" })).toHaveCount(0);
+  });
+
+  test("E2E-10: Embed — token sai hiện lỗi", async ({ page }) => {
+    const { boardId } = await enableEmbedForCompanyBoard(USERS.adminA.slug);
+    await page.goto(`/embed/${boardId}?token=wrong-token`);
+    await expect(page.getByText("Không thể hiển thị bảng ghim này")).toBeVisible();
+  });
+
+  test("E2E-11: Admin ẩn ghim vi phạm", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+
+    const pinContent = `E2E hide me ${Date.now()}`;
+    await page.getByPlaceholder("Viết lời biết ơn").fill(pinContent);
+    await page.getByRole("button", { name: "Đăng ghim" }).click();
+    await page.waitForLoadState("networkidle");
+    await expect(pinOnBoard(page, pinContent).first()).toBeVisible({ timeout: 15_000 });
+
+    await page.goto(`/${USERS.adminA.slug}/admin/pins`);
+    const pinRow = page
+      .locator(".rounded-xl.border.bg-white")
+      .filter({ hasText: pinContent });
+    await expect(pinRow).toBeVisible();
+    page.once("dialog", (d) => d.accept());
+    await pinRow.getByRole("button", { name: "Ẩn ghim" }).click();
+    await page.waitForLoadState("networkidle");
+
+    await page.goto(`/${USERS.adminA.slug}/board`);
+    await expect(pinOnBoard(page, pinContent)).toHaveCount(0);
+  });
+});
