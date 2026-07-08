@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Board } from "@/components/board/Board";
 import { BoardNav } from "@/components/board/BoardNav";
+import { BoardCreatePinFab } from "@/components/board/BoardCreatePinFab";
 import { BoardPageLayout } from "@/components/board/BoardPageLayout";
 import { BoardPinLayer } from "@/components/board/BoardPinLayer";
 import type { BoardSkin } from "@/lib/utils/board";
@@ -8,6 +9,7 @@ import {
   getAccessibleBoards,
   getBoardPins,
   getCompanyBySlug,
+  getCompanyMembers,
   getCurrentMember,
 } from "@/lib/data/board";
 
@@ -32,6 +34,7 @@ export default async function CompanyBoardPage({
   if (!companyBoard) notFound();
 
   const pins = await getBoardPins(companyBoard.id, isAdmin);
+  const members = await getCompanyMembers(company.id);
 
   const navItems = [
     {
@@ -52,6 +55,9 @@ export default async function CompanyBoardPage({
     }),
   ];
 
+  const boardOptions = navItems.map((item) => ({ id: item.id, label: item.label }));
+  const memberOptions = members.map((m) => ({ id: m.id, name: m.display_name }));
+
   return (
     <BoardPageLayout
       nav={<BoardNav items={navItems} currentId={companyBoard.id} />}
@@ -63,6 +69,13 @@ export default async function CompanyBoardPage({
           />
         </Board>
       }
-    />
+    >
+      <BoardCreatePinFab
+        companySlug={params.companySlug}
+        boards={boardOptions}
+        members={memberOptions}
+        defaultBoardId={companyBoard.id}
+      />
+    </BoardPageLayout>
   );
 }

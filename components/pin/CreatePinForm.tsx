@@ -15,12 +15,18 @@ export function CreatePinForm({
   members,
   defaultBoardId,
   disabled,
+  inModal,
+  onSuccess,
+  onCancel,
 }: {
   companySlug: string;
   boards: BoardOption[];
   members: MemberOption[];
   defaultBoardId: string;
   disabled?: boolean;
+  inModal?: boolean;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,7 +76,11 @@ export function CreatePinForm({
         return;
       }
 
-      window.location.reload();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        window.location.reload();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
       setLoading(false);
@@ -80,7 +90,7 @@ export function CreatePinForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-8 rounded-2xl border border-umber/10 bg-white/80 p-6"
+      className={inModal ? "" : "mb-8 rounded-2xl border border-umber/10 bg-white/80 p-6"}
     >
       <h2 className="font-heading text-xl text-umber mb-4">Đăng ghim mới</h2>
       <textarea
@@ -144,13 +154,24 @@ export function CreatePinForm({
         Đăng ẩn danh
       </label>
       {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-full bg-peach px-6 py-2 text-white disabled:opacity-50"
-      >
-        {loading ? "Đang đăng..." : "Đăng ghim"}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-full bg-peach px-6 py-2 text-white disabled:opacity-50"
+        >
+          {loading ? "Đang đăng..." : "Đăng ghim"}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full border border-umber/20 px-6 py-2 text-umber"
+          >
+            Huỷ
+          </button>
+        )}
+      </div>
     </form>
   );
 }
