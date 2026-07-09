@@ -2,16 +2,29 @@
 
 import type { PinTemplate } from "@/lib/utils/board";
 import { ALL_TEMPLATES, TEMPLATE_LABELS } from "@/lib/utils/board";
+import { renderPinVariant } from "./templates/variants";
 
-const PREVIEW_STYLES: Record<PinTemplate, string> = {
-  note: "bg-[#fffaf0] bg-[repeating-linear-gradient(180deg,transparent,transparent_6px,#e7dcc8_7px)]",
-  polaroid: "bg-white border-4 border-white shadow-inner",
-  floral: "bg-gradient-to-br from-[#fdeee7] to-[#fbf3e7] border border-[#f0d3c8]",
-  washi: "bg-[#f1e4cf]",
-  garden: "bg-gradient-to-b from-[#eef7f0] to-[#dcedde]",
-  sunshine: "bg-[radial-gradient(circle_at_18%_18%,#fff6da,#F2C879)]",
-  love: "bg-[#fff8f6]",
-};
+const PREVIEW_PLACEHOLDER_IMAGE =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
+      <rect width="200" height="150" fill="#e9e2d6"/>
+      <circle cx="100" cy="62" r="22" fill="#d4cbb8"/>
+      <path d="M55 120 Q100 88 145 120" stroke="#d4cbb8" stroke-width="8" fill="none" stroke-linecap="round"/>
+    </svg>`
+  );
+
+function previewPin(template: PinTemplate, hasImage: boolean) {
+  return {
+    id: `preview-${template}`,
+    content: "Cảm ơn bạn!",
+    image_url:
+      hasImage || template === "polaroid" ? PREVIEW_PLACEHOLDER_IMAGE : null,
+    recipient_name: null,
+    is_edited: false,
+    edited_at: null,
+  };
+}
 
 export function TemplatePicker({
   value,
@@ -24,42 +37,49 @@ export function TemplatePicker({
 }) {
   return (
     <div>
-      <label className="text-sm">Mẫu ghim</label>
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <p className="mb-1.5 text-sm font-medium text-umber/80">Mẫu ghim</p>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {ALL_TEMPLATES.map((t) => {
           const disabled = t === "polaroid" && !hasImage;
           const selected = value === t;
+          const pin = previewPin(t, hasImage);
+
           return (
             <button
               key={t}
               type="button"
               disabled={disabled}
-              title={
-                disabled ? "Cần thêm ảnh để dùng mẫu Polaroid" : TEMPLATE_LABELS[t]
-              }
+              title={TEMPLATE_LABELS[t]}
               onClick={() => !disabled && onChange(t)}
-              className={`rounded-lg border p-2 text-left transition ${
+              className={`relative overflow-hidden rounded-xl border p-1.5 text-left transition ${
                 selected
-                  ? "border-peach bg-peach/10 ring-1 ring-peach"
-                  : "border-umber/15 bg-white hover:border-peach/50"
-              } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  ? "border-peach bg-peach/10 ring-2 ring-peach/40"
+                  : "border-umber/12 bg-white/80 hover:border-peach/40"
+              } ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
             >
-              <div
-                className={`mb-1.5 h-10 w-full rounded ${PREVIEW_STYLES[t]}`}
-                aria-hidden
-              />
-              <span className="block text-xs font-medium text-umber">
+              <div className="flex h-[88px] items-center justify-center overflow-hidden rounded-lg bg-cream/50">
+                <div className="origin-center scale-[0.42]">
+                  {renderPinVariant(t, {
+                    pin,
+                    authorLabel: "Bạn",
+                    compact: true,
+                  })}
+                </div>
+              </div>
+              <span className="mt-1.5 block px-0.5 text-xs font-medium text-umber">
                 {TEMPLATE_LABELS[t]}
               </span>
+              {disabled && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-umber/25 backdrop-blur-[1px]">
+                  <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-umber shadow-sm">
+                    🔒 Cần ảnh
+                  </span>
+                </div>
+              )}
             </button>
           );
         })}
       </div>
-      {!hasImage && (
-        <p className="mt-1.5 text-xs text-umber/50">
-          Cần thêm ảnh để dùng mẫu Polaroid
-        </p>
-      )}
     </div>
   );
 }
