@@ -61,7 +61,7 @@ export function SharePinButton({
         type="button"
         onClick={exportImage}
         disabled={sharing}
-        className="text-xs text-peach underline disabled:opacity-50"
+        className="pin-share-btn text-xs text-peach underline disabled:opacity-50"
       >
         {sharing ? "..." : "Chia sẻ"}
       </button>

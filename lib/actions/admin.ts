@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { assertCanHidePinOnBoard } from "@/lib/auth/memberContext";
 
 async function getAdminContext(companySlug: string) {
   const supabase = createClient();
@@ -152,6 +153,7 @@ const departmentSchema = z.object({
   companySlug: z.string(),
   name: z.string().min(1),
   skin: z.enum(["wood", "felt", "linen", "chalkboard"]),
+  boardAdminMemberIds: z.array(z.string().uuid()).optional(),
 });
 
 export async function createDepartment(input: z.infer<typeof departmentSchema>) {
@@ -173,6 +175,20 @@ export async function createDepartment(input: z.infer<typeof departmentSchema>) 
     skin: parsed.data.skin,
   });
   if (boardError) return { error: boardError.message };
+
+  const { data: board } = await admin
+    .from("boards")
+    .select("id")
+    .eq("department_id", dept.id)
+    .single();
+
+  const adminIds = parsed.data.boardAdminMemberIds ?? [];
+  if (board && adminIds.length > 0) {
+    const { error: baError } = await admin.from("board_admins").insert(
+      adminIds.map((memberId) => ({ board_id: board.id, member_id: memberId }))
+    );
+    if (baError) return { error: baError.message };
+  }
 
   revalidatePath(`/${company.slug}/admin/departments`);
   return { success: true };
@@ -237,18 +253,30 @@ export async function updateCompanySettings(input: z.infer<typeof settingsSchema
 }
 
 export async function hidePin(companySlug: string, pinId: string) {
-  const { admin, company } = await getAdminContext(companySlug);
+  try {
+    const supabase = createClient();
+    await assertCanHidePinOnBoard(companySlug, pinId);
 
-  const { error } = await admin
-    .from("pins")
-    .update({ is_hidden: true })
-    .eq("id", pinId)
-    .eq("company_id", company.id);
-  if (error) return { error: error.message };
+    const { data: company } = await supabase
+      .from("companies")
+      .select("id, slug")
+      .eq("slug", companySlug)
+      .single();
+    if (!company) return { error: "Không tìm thấy công ty" };
 
-  revalidatePath(`/${company.slug}/admin/pins`);
-  revalidatePath(`/${company.slug}/board`);
-  return { success: true };
+    const { error } = await supabase
+      .from("pins")
+      .update({ is_hidden: true })
+      .eq("id", pinId)
+      .eq("company_id", company.id);
+    if (error) return { error: error.message };
+
+    revalidatePath(`/${company.slug}/admin/pins`);
+    revalidatePath(`/${company.slug}/board`);
+    return { success: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Không có quyền" };
+  }
 }
 
 export async function enableBoardEmbed(companySlug: string, boardId: string) {

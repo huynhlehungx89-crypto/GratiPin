@@ -149,6 +149,21 @@ test.describe("GratiPin E2E", () => {
     await expect(pinOnBoard(page, pinContent)).toHaveCount(0);
   });
 
+  test("E2E-12b: User thường không thấy Ẩn ghim trên board", async ({ page }) => {
+    await login(page, "user-a2@gratipin.test");
+    await page.waitForURL(`**/${USERS.userA1.slug}/board**`);
+
+    await expect(page.getByRole("button", { name: "Ẩn ghim" })).toHaveCount(0);
+
+    const menus = page.getByRole("button", { name: "Tuỳ chọn ghim" });
+    const count = await menus.count();
+    for (let i = 0; i < count; i++) {
+      await menus.nth(i).click();
+      await expect(page.getByRole("button", { name: "Ẩn ghim" })).toHaveCount(0);
+      await page.keyboard.press("Escape");
+    }
+  });
+
   test("E2E-12: Admin ẩn ghim từ menu trên board", async ({ page }) => {
     await login(page, USERS.adminA.email);
     await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
@@ -161,10 +176,12 @@ test.describe("GratiPin E2E", () => {
     const pinArticle = page.locator("[data-pin-export]").filter({ hasText: pinContent }).first();
     await expect(pinArticle).toBeVisible({ timeout: 15_000 });
 
-    const pinCard = pinArticle.locator("..");
-    await pinCard.getByRole("button", { name: "Tuỳ chọn ghim" }).click();
+    await pinArticle.locator("..").getByRole("button", { name: "Tuỳ chọn ghim" }).click();
     page.once("dialog", (d) => d.accept());
-    await pinCard.getByRole("button", { name: "Ẩn ghim" }).click();
+    await pinArticle
+      .locator("..")
+      .getByRole("button", { name: "Ẩn ghim" })
+      .click();
     await expect(pinOnBoard(page, pinContent)).toHaveCount(0, { timeout: 10_000 });
   });
 });

@@ -5,6 +5,7 @@ import type { PinDisplay } from "./PinCard.types";
 import { TEMPLATE_LABELS } from "@/lib/utils/board";
 import { EditPinModal } from "./EditPinModal";
 import { PinModal } from "./PinModal";
+import { PinOptionsMenu } from "./PinOptionsMenu";
 import { SharePinButton } from "./SharePinButton";
 import { renderPinVariant } from "./templates/variants";
 
@@ -16,12 +17,16 @@ export function PinCard({
   companySlug,
   canShare = true,
   canEdit = false,
+  canModerate = false,
+  onHidden,
 }: {
   pin: PinDisplay;
   companyLogoUrl?: string | null;
   companySlug?: string;
   canShare?: boolean;
   canEdit?: boolean;
+  canModerate?: boolean;
+  onHidden?: () => void;
 }) {
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -44,16 +49,22 @@ export function PinCard({
     <>
       <div className="relative">
         {renderPinVariant(pin.template, variantProps)}
+        {(canEdit || (canModerate && !pin.is_hidden)) && companySlug && (
+          <div
+            className="absolute right-1 top-1 z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PinOptionsMenu
+              pinId={pin.id}
+              companySlug={companySlug}
+              canEdit={canEdit}
+              canHide={canModerate && !pin.is_hidden}
+              onEdit={() => setEditOpen(true)}
+              onHidden={() => onHidden?.()}
+            />
+          </div>
+        )}
         <div className="mt-1 flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-          {canEdit && companySlug && (
-            <button
-              type="button"
-              onClick={() => setEditOpen(true)}
-              className="text-xs text-umber/70 hover:text-peach"
-            >
-              Sửa
-            </button>
-          )}
           {canShare && !pin.is_hidden && (
             <SharePinButton pinId={pin.id} pin={pin} companyLogoUrl={companyLogoUrl} />
           )}
