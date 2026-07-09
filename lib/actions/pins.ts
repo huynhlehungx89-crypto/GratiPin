@@ -54,6 +54,10 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
     return { error: "Bảng này đã lưu trữ, không thể đăng ghim mới" };
   }
 
+  if (parsed.data.template === "polaroid" && !parsed.data.imageUrl) {
+    return { error: "Cần thêm ảnh để dùng mẫu Polaroid" };
+  }
+
   const { data: existingPins } = await supabase
     .from("pins")
     .select("position_x, position_y")

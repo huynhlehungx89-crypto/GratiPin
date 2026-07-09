@@ -32,6 +32,21 @@ export function CreatePinForm({
   const [loading, setLoading] = useState(false);
   const [template, setTemplate] = useState<PinTemplate>("note");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [hasImage, setHasImage] = useState(false);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const nextHasImage = !!file && file.size > 0;
+    setHasImage(nextHasImage);
+    if (!nextHasImage && template === "polaroid") {
+      setTemplate("note");
+    }
+  }
+
+  function handleTemplateChange(next: PinTemplate) {
+    if (next === "polaroid" && !hasImage) return;
+    setTemplate(next);
+  }
 
   if (disabled) return null;
 
@@ -58,6 +73,12 @@ export function CreatePinForm({
         if (uploadError) throw uploadError;
         const { data } = supabase.storage.from("pin-images").getPublicUrl(fileName);
         imageUrl = data.publicUrl;
+      }
+
+      if (template === "polaroid" && !imageUrl) {
+        setError("Cần thêm ảnh để dùng mẫu Polaroid");
+        setLoading(false);
+        return;
       }
 
       const result = await createPin({
@@ -105,15 +126,30 @@ export function CreatePinForm({
           <label className="text-sm">Template</label>
           <select
             value={template}
-            onChange={(e) => setTemplate(e.target.value as PinTemplate)}
+            onChange={(e) => handleTemplateChange(e.target.value as PinTemplate)}
             className="mt-1 w-full rounded-lg border border-umber/20 px-3 py-2"
           >
             {(Object.keys(TEMPLATE_LABELS) as PinTemplate[]).map((t) => (
-              <option key={t} value={t}>
+              <option
+                key={t}
+                value={t}
+                disabled={t === "polaroid" && !hasImage}
+                title={
+                  t === "polaroid" && !hasImage
+                    ? "Cần thêm ảnh để dùng mẫu Polaroid"
+                    : undefined
+                }
+              >
                 {TEMPLATE_LABELS[t]}
+                {t === "polaroid" && !hasImage ? " (cần ảnh)" : ""}
               </option>
             ))}
           </select>
+          {!hasImage && (
+            <p className="mt-1 text-xs text-umber/50" title="Cần thêm ảnh để dùng mẫu Polaroid">
+              Cần thêm ảnh để dùng mẫu Polaroid
+            </p>
+          )}
         </div>
         <div>
           <label className="text-sm">Bảng đích</label>
@@ -143,7 +179,13 @@ export function CreatePinForm({
       </div>
       <div className="mb-3">
         <label className="text-sm">Ảnh đính kèm</label>
-        <input name="image" type="file" accept="image/*" className="mt-1 block w-full text-sm" />
+        <input
+          name="image"
+          type="file"
+          accept="image/*"
+          className="mt-1 block w-full text-sm"
+          onChange={handleImageChange}
+        />
       </div>
       <label className="mb-4 flex items-center gap-2 text-sm">
         <input
