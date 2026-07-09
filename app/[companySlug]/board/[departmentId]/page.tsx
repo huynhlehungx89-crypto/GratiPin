@@ -86,7 +86,7 @@ export default async function DepartmentBoardPage({
       title={dept?.name}
       nav={<BoardNav items={navItems} currentId={board.id} />}
       board={
-        <Board skin={board.skin as BoardSkin} archived={archived}>
+        <Board skin={board.skin as BoardSkin} archived={archived} pins={pins}>
           <BoardPinLayer
             pins={pins.filter((p) => !p.is_hidden)}
             companyLogoUrl={company.logo_url}

@@ -61,7 +61,7 @@ export default async function EmbedBoardPage({
 
   return (
     <main className="h-screen bg-cream">
-      <Board skin={board.skin as BoardSkin}>
+      <Board skin={board.skin as BoardSkin} pins={displayPins}>
         <BoardPinLayer pins={displayPins} companyLogoUrl={company?.logo_url ?? null} draggable={false} />
       </Board>
     </main>

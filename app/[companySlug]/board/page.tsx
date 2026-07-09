@@ -62,7 +62,7 @@ export default async function CompanyBoardPage({
     <BoardPageLayout
       nav={<BoardNav items={navItems} currentId={companyBoard.id} />}
       board={
-        <Board skin={companyBoard.skin as BoardSkin}>
+        <Board skin={companyBoard.skin as BoardSkin} pins={pins}>
           <BoardPinLayer
             pins={pins.filter((p) => !p.is_hidden)}
             companyLogoUrl={company.logo_url}

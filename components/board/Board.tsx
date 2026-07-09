@@ -1,10 +1,13 @@
 import type { BoardSkin } from "@/lib/utils/board";
 import { getBoardSkinClass } from "@/lib/utils/board";
+import { getBoardCanvasSize } from "@/lib/pins/canvas";
+import type { PinDisplay } from "@/components/pin/PinCard";
 
 type BoardProps = {
   skin: BoardSkin;
   children: React.ReactNode;
   archived?: boolean;
+  pins?: Pick<PinDisplay, "position_x" | "position_y">[];
   canvasMinWidth?: number;
   canvasMinHeight?: number;
 };
@@ -13,18 +16,23 @@ export function Board({
   skin,
   children,
   archived,
-  canvasMinWidth = 1200,
-  canvasMinHeight = 800,
+  pins = [],
+  canvasMinWidth,
+  canvasMinHeight,
 }: BoardProps) {
+  const autoSize = getBoardCanvasSize(pins);
+  const minWidth = canvasMinWidth ?? autoSize.width;
+  const minHeight = canvasMinHeight ?? autoSize.height;
+
   return (
     <div className="h-full w-full overflow-auto bg-cream/30">
       <div
         className={`relative min-h-full ${getBoardSkinClass(skin)}`}
         style={{
-          minWidth: canvasMinWidth,
-          minHeight: canvasMinHeight,
-          width: "max(100%, " + canvasMinWidth + "px)",
-          height: "max(100%, " + canvasMinHeight + "px)",
+          minWidth,
+          minHeight,
+          width: `max(100%, ${minWidth}px)`,
+          height: `max(100%, ${minHeight}px)`,
         }}
       >
         {archived && (
