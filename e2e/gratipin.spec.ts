@@ -9,7 +9,12 @@ import {
 } from "./helpers";
 
 function pinOnBoard(page: import("@playwright/test").Page, content: string) {
-  return page.locator('[class*="min-h-[480px]"] article').filter({ hasText: content });
+  return page.locator("article[data-pin-export]").filter({ hasText: content });
+}
+
+async function openCreatePinModal(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "Thêm ghim" }).click();
+  await expect(page.getByRole("heading", { name: "Đăng ghim mới" })).toBeVisible();
 }
 
 async function login(page: import("@playwright/test").Page, email: string) {
@@ -36,7 +41,7 @@ test.describe("GratiPin E2E", () => {
   test("E2E-02: Đăng nhập admin → vào bảng chung", async ({ page }) => {
     await login(page, USERS.adminA.email);
     await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
-    await expect(page.getByRole("heading", { name: "Đăng ghim mới" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Thêm ghim" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Bảng chung/ })).toBeVisible();
   });
 
@@ -74,8 +79,9 @@ test.describe("GratiPin E2E", () => {
     await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
 
     const pinContent = `E2E ghim ${Date.now()}`;
-    await page.getByPlaceholder("Viết lời biết ơn").fill(pinContent);
-    await page.getByRole("button", { name: "Đăng ghim" }).click();
+    await openCreatePinModal(page);
+    await page.getByPlaceholder("Viết lời biết ơn, kỷ niệm...").fill(pinContent);
+    await page.getByRole("button", { name: "Đăng ghim", exact: true }).click();
     await page.waitForLoadState("networkidle");
     await expect(pinOnBoard(page, pinContent).first()).toBeVisible({ timeout: 15_000 });
   });
@@ -118,8 +124,9 @@ test.describe("GratiPin E2E", () => {
     await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
 
     const pinContent = `E2E hide me ${Date.now()}`;
-    await page.getByPlaceholder("Viết lời biết ơn").fill(pinContent);
-    await page.getByRole("button", { name: "Đăng ghim" }).click();
+    await openCreatePinModal(page);
+    await page.getByPlaceholder("Viết lời biết ơn, kỷ niệm...").fill(pinContent);
+    await page.getByRole("button", { name: "Đăng ghim", exact: true }).click();
     await page.waitForLoadState("networkidle");
     await expect(pinOnBoard(page, pinContent).first()).toBeVisible({ timeout: 15_000 });
 
