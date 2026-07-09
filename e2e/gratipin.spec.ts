@@ -119,27 +119,52 @@ test.describe("GratiPin E2E", () => {
     await expect(page.getByText("Không thể hiển thị bảng ghim này")).toBeVisible();
   });
 
-  test("E2E-11: Admin ẩn ghim vi phạm", async ({ page }) => {
+  test("E2E-11: Admin từ chối ghim (trang Kiểm duyệt)", async ({ page }) => {
     await login(page, USERS.adminA.email);
     await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
 
     const pinContent = `E2E hide me ${Date.now()}`;
     await openCreatePinModal(page);
-    await page.getByPlaceholder("Viết lời biết ơn, kỷ niệm...").fill(pinContent);
+    await page.getByPlaceholder(/Viết lời biết ơn/).fill(pinContent);
     await page.getByRole("button", { name: "Đăng ghim", exact: true }).click();
     await page.waitForLoadState("networkidle");
     await expect(pinOnBoard(page, pinContent).first()).toBeVisible({ timeout: 15_000 });
 
     await page.goto(`/${USERS.adminA.slug}/admin/pins`);
     const pinRow = page
-      .locator(".rounded-xl.border.bg-white")
+      .locator(".border-b.border-umber\\/10")
       .filter({ hasText: pinContent });
     await expect(pinRow).toBeVisible();
     page.once("dialog", (d) => d.accept());
-    await pinRow.getByRole("button", { name: "Ẩn ghim" }).click();
+    await pinRow.getByRole("button", { name: "Từ chối" }).click();
     await page.waitForLoadState("networkidle");
+
+    await expect(page.getByText("Không còn ghim chờ kiểm duyệt")).toBeVisible({
+      timeout: 10_000,
+    }).catch(async () => {
+      await expect(pinRow).toHaveCount(0);
+    });
 
     await page.goto(`/${USERS.adminA.slug}/board`);
     await expect(pinOnBoard(page, pinContent)).toHaveCount(0);
+  });
+
+  test("E2E-12: Admin ẩn ghim từ menu trên board", async ({ page }) => {
+    await login(page, USERS.adminA.email);
+    await page.waitForURL(`**/${USERS.adminA.slug}/board**`);
+
+    const pinContent = `E2E board hide ${Date.now()}`;
+    await openCreatePinModal(page);
+    await page.getByPlaceholder(/Viết lời biết ơn/).fill(pinContent);
+    await page.getByRole("button", { name: "Đăng ghim", exact: true }).click();
+    await page.waitForLoadState("networkidle");
+    const pinArticle = page.locator("[data-pin-export]").filter({ hasText: pinContent }).first();
+    await expect(pinArticle).toBeVisible({ timeout: 15_000 });
+
+    const pinCard = pinArticle.locator("..");
+    await pinCard.getByRole("button", { name: "Tuỳ chọn ghim" }).click();
+    page.once("dialog", (d) => d.accept());
+    await pinCard.getByRole("button", { name: "Ẩn ghim" }).click();
+    await expect(pinOnBoard(page, pinContent)).toHaveCount(0, { timeout: 10_000 });
   });
 });
