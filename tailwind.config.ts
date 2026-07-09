@@ -18,6 +18,7 @@ const config: Config = {
       fontFamily: {
         heading: ["var(--font-heading)", "sans-serif"],
         body: ["var(--font-body)", "sans-serif"],
+        handwriting: ["var(--font-handwriting)", "cursive"],
       },
     },
   },

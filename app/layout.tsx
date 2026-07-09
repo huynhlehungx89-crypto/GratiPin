@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Quicksand } from "next/font/google";
+import { Inter, Itim, Quicksand } from "next/font/google";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -11,6 +11,13 @@ const quicksand = Quicksand({
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const itim = Itim({
+  weight: "400",
+  subsets: ["latin", "vietnamese"],
+  variable: "--font-handwriting",
   display: "swap",
 });
 
@@ -31,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${quicksand.variable} ${inter.variable} font-body antialiased`}>
+      <body className={`${quicksand.variable} ${inter.variable} ${itim.variable} font-body antialiased`}>
         {children}
       </body>
     </html>
