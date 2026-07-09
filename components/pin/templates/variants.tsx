@@ -1,0 +1,368 @@
+"use client";
+
+import type { PinTemplate } from "@/lib/utils/board";
+import {
+  FloralBottomGrassSvg,
+  FloralCornerSvg,
+  GardenGrassSvg,
+  SunshineRaysSvg,
+} from "./svg";
+
+type PinThumbProps = { gradient: string };
+
+export function PinThumb({ gradient }: PinThumbProps) {
+  return (
+    <div
+      className="absolute left-1/2 top-[-9px] z-[5] h-4 w-4 -translate-x-1/2 rounded-full shadow-[0_2px_3px_rgba(0,0,0,0.25)]"
+      style={{ background: gradient }}
+      aria-hidden
+    />
+  );
+}
+
+export function PinMeta({
+  authorLabel,
+  recipientName,
+  className = "",
+}: {
+  authorLabel: string;
+  recipientName?: string | null;
+  className?: string;
+}) {
+  return (
+    <div className={`text-[11px] text-[#a3937f] ${className}`}>
+      <p>{authorLabel}</p>
+      {recipientName && <p>→ {recipientName}</p>}
+    </div>
+  );
+}
+
+export function ExportLogo({ companyLogoUrl }: { companyLogoUrl?: string | null }) {
+  if (!companyLogoUrl) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={companyLogoUrl}
+      alt=""
+      className="absolute bottom-1 right-1 hidden h-5 w-5 rounded-full opacity-80 export-only"
+      data-export-logo
+    />
+  );
+}
+
+export type PinVariantProps = {
+  pin: {
+    id: string;
+    content: string;
+    image_url: string | null;
+    recipient_name?: string | null;
+  };
+  authorLabel: string;
+  companyLogoUrl?: string | null;
+  onClick?: () => void;
+};
+
+const PIN_BASE =
+  "relative inline-block w-[190px] cursor-pointer transition hover:scale-105 filter drop-shadow-[0_6px_10px_rgba(74,59,50,0.18)]";
+
+export function NotePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} rounded-sm bg-[#fffaf0]`}
+      style={{
+        backgroundImage:
+          "repeating-linear-gradient(180deg, transparent, transparent 21px, #e7dcc8 22px)",
+      }}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <PinThumb gradient="radial-gradient(circle at 35% 35%, #ff8a7a, #d64545)" />
+      <div className="px-3.5 pb-3 pt-2">
+        <p className="whitespace-pre-wrap break-words pt-1.5 font-handwriting text-[15.5px] leading-normal text-umber">
+          {pin.content}
+        </p>
+        {pin.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={pin.image_url}
+            alt=""
+            className="absolute bottom-3 right-2 h-14 w-14 rotate-3 rounded border-2 border-white object-cover shadow-sm"
+          />
+        )}
+        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} className="mt-2.5" />
+      </div>
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function PolaroidPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  if (!pin.image_url) return null;
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} rounded-sm bg-white pb-0 pt-2`}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <PinThumb gradient="radial-gradient(circle at 35% 35%, #ffd27a, #c9871f)" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={pin.image_url} alt="" className="block h-[130px] w-full object-cover bg-[#e9e2d6]" />
+      <p className="whitespace-pre-wrap break-words px-1.5 pb-4 pt-2 text-center font-handwriting text-[14.5px] leading-snug text-umber">
+        {pin.content}
+      </p>
+      <div className="px-2 pb-2">
+        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} />
+      </div>
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function FloralPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} overflow-hidden rounded-[10px] border border-[#f0d3c8] bg-gradient-to-br from-[#fdeee7] to-[#fbf3e7] to-60%`}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <div
+        className="pointer-events-none absolute inset-[6px] rounded-md border border-[#f5ddd0]"
+        aria-hidden
+      />
+      <PinThumb gradient="radial-gradient(circle at 35% 35%, #c9e3d1, #7fae8f)" />
+      <FloralCornerSvg className="absolute left-1 top-1 z-[2] h-[30px] w-[30px] opacity-90" />
+      <FloralCornerSvg className="absolute bottom-1 right-1 z-[2] h-[30px] w-[30px] rotate-180 opacity-90" />
+      {pin.image_url && (
+        <div className="relative z-[2] mx-2 mb-2 mt-3 rounded-md border border-peach/30 p-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={pin.image_url} alt="" className="max-h-28 w-full rounded object-cover" />
+        </div>
+      )}
+      <p className="relative z-[2] whitespace-pre-wrap break-words px-2.5 pb-1.5 pt-3.5 text-center font-display text-[14.5px] font-medium leading-normal text-[#5c4437]">
+        {pin.content}
+      </p>
+      <PinMeta
+        authorLabel={authorLabel}
+        recipientName={pin.recipient_name}
+        className="relative z-[2] pb-[18px] text-center"
+      />
+      <FloralBottomGrassSvg className="absolute bottom-0 left-0 z-[1] h-3.5 w-full opacity-90" />
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function WashiPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} rounded-sm bg-[#f1e4cf]`}
+      style={{
+        backgroundImage:
+          "radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1.5px)",
+        backgroundSize: "14px 14px",
+      }}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <div
+        className="absolute left-[-12px] top-[-9px] h-5 w-16 -rotate-[40deg] opacity-85 shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+        style={{
+          background:
+            "repeating-linear-gradient(45deg, rgba(169,203,183,0.75) 0 6px, rgba(244,169,155,0.75) 6px 12px)",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute bottom-[-9px] right-[-12px] h-5 w-16 -rotate-[40deg] opacity-85 shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+        style={{
+          background:
+            "repeating-linear-gradient(45deg, rgba(169,203,183,0.75) 0 6px, rgba(244,169,155,0.75) 6px 12px)",
+        }}
+        aria-hidden
+      />
+      <div className="px-3.5 pb-3 pt-2">
+        <p className="whitespace-pre-wrap break-words pt-2 font-handwriting text-[15.5px] leading-normal text-umber">
+          {pin.content}
+        </p>
+        {pin.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={pin.image_url}
+            alt=""
+            className="relative mt-2 max-h-24 w-4/5 -rotate-2 border-4 border-white object-cover shadow"
+          />
+        )}
+        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} className="mt-2.5" />
+      </div>
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function GardenPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} overflow-hidden rounded-xl bg-gradient-to-b from-[#eef7f0] to-[#dcedde]`}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <PinThumb gradient="radial-gradient(circle at 35% 35%, #d6e8a8, #8fae5a)" />
+      {pin.image_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={pin.image_url}
+          alt=""
+          className="mx-auto mb-1 mt-3.5 block h-[88px] w-[88px] rounded-full border-4 border-white object-cover shadow-[0_2px_6px_rgba(0,0,0,0.12)]"
+        />
+      )}
+      <p
+        className={`whitespace-pre-wrap break-words px-3 text-center font-display text-[14.5px] font-medium leading-normal text-[#3f5c46] ${pin.image_url ? "pt-0" : "pb-[30px] pt-4"}`}
+      >
+        {pin.content}
+      </p>
+      <PinMeta
+        authorLabel={authorLabel}
+        recipientName={pin.recipient_name}
+        className={`text-center text-[#7a9382] ${pin.image_url ? "-mt-5 pb-[26px]" : "pb-[30px]"}`}
+      />
+      <GardenGrassSvg className="absolute bottom-0 left-0 h-[22px] w-full" />
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function SunshinePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} overflow-hidden rounded-[10px] bg-[radial-gradient(circle_at_18%_18%,#fff6da_0%,#F2C879_55%,#eaa94f_100%)]`}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <div
+        className="absolute left-[-46px] top-[-46px] z-[1] h-[150px] w-[150px] rounded-full blur-[3px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,246,218,0.65) 40%, transparent 72%)",
+        }}
+        aria-hidden
+      />
+      <SunshineRaysSvg className="absolute left-[-30px] top-[-30px] z-[1] h-[110px] w-[110px] opacity-80" />
+      <span className="absolute left-[70px] top-9 z-[1] text-[10px] text-white opacity-85" aria-hidden>
+        ✦
+      </span>
+      <span
+        className="absolute left-[92px] top-3 z-[1] text-[8px] text-white opacity-85"
+        aria-hidden
+      >
+        ✦
+      </span>
+      <PinThumb gradient="radial-gradient(circle at 35% 35%, #fff, #F2C879)" />
+      <p className="relative z-[2] whitespace-pre-wrap break-words px-3 pt-6 text-center font-display text-[14.5px] font-semibold leading-normal text-[#6b4a1c]">
+        {pin.content}
+      </p>
+      <PinMeta
+        authorLabel={authorLabel}
+        recipientName={pin.recipient_name}
+        className="relative z-[2] px-3 pb-2 text-center text-[#8a6018]"
+      />
+      {pin.image_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={pin.image_url}
+          alt=""
+          className="relative z-[2] mx-2.5 mb-3 block h-[100px] w-[calc(100%-20px)] rounded-lg object-cover shadow-[0_0_0_4px_#fff,0_4px_10px_rgba(180,120,20,0.25)]"
+        />
+      )}
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function LovePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+  return (
+    <article
+      onClick={onClick}
+      className={`${PIN_BASE} overflow-hidden rounded bg-[#fff8f6] pt-4`}
+      data-pin-id={pin.id}
+      data-pin-export
+    >
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <span
+          className="absolute left-[10%] top-[60%] text-sm text-peach opacity-35"
+          style={{ transform: "rotate(-10deg)" }}
+        >
+          ♥
+        </span>
+        <span
+          className="absolute left-[70%] top-[75%] text-[10px] text-peach opacity-30"
+          style={{ transform: "rotate(8deg)" }}
+        >
+          ♥
+        </span>
+        <span className="absolute left-[80%] top-[40%] text-xs text-peach opacity-25">♥</span>
+      </div>
+      <div
+        className="absolute left-0 top-0 z-[1] h-[38px] w-full"
+        style={{
+          background:
+            "linear-gradient(135deg, transparent 50%, #fbe4dd 50%) top left / 50% 100% no-repeat, linear-gradient(225deg, transparent 50%, #fbe4dd 50%) top right / 50% 100% no-repeat",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute left-1/2 top-[22px] z-[5] flex h-[26px] w-[26px] -translate-x-1/2 items-center justify-center rounded-full text-xs text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+        style={{ background: "radial-gradient(circle at 35% 35%, #f4a99b, #d6685a)" }}
+        aria-hidden
+      >
+        ♥
+      </div>
+      <p className="relative z-[2] whitespace-pre-wrap break-words px-4 pb-3.5 pt-5 text-center font-handwriting text-[15.5px] leading-snug text-[#5c4437]">
+        {pin.content}
+      </p>
+      <PinMeta
+        authorLabel={authorLabel}
+        recipientName={pin.recipient_name}
+        className="relative z-[2] pb-3 text-center"
+      />
+      {pin.image_url && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={pin.image_url}
+          alt=""
+          className="relative z-[2] mx-4 mb-3 block h-[90px] w-[calc(100%-32px)] rounded-md border-[3px] border-white object-cover shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
+        />
+      )}
+      <ExportLogo companyLogoUrl={companyLogoUrl} />
+    </article>
+  );
+}
+
+export function renderPinVariant(
+  template: PinTemplate,
+  props: PinVariantProps
+): React.ReactNode {
+  switch (template) {
+    case "note":
+      return <NotePinVariant {...props} />;
+    case "polaroid":
+      return <PolaroidPinVariant {...props} />;
+    case "floral":
+      return <FloralPinVariant {...props} />;
+    case "washi":
+      return <WashiPinVariant {...props} />;
+    case "garden":
+      return <GardenPinVariant {...props} />;
+    case "sunshine":
+      return <SunshinePinVariant {...props} />;
+    case "love":
+      return <LovePinVariant {...props} />;
+    default:
+      return <NotePinVariant {...props} />;
+  }
+}

@@ -9,7 +9,7 @@ const pinSchema = z.object({
   companySlug: z.string(),
   boardId: z.string().uuid(),
   content: z.string().min(1, "Nội dung không được trống"),
-  template: z.enum(["note", "polaroid", "floral", "washi"]),
+  template: z.enum(["note", "polaroid", "floral", "washi", "garden", "sunshine", "love"]),
   isAnonymous: z.boolean(),
   recipientMemberId: z.string().uuid().optional().nullable(),
   imageUrl: z.string().url().optional().nullable(),

@@ -19,6 +19,7 @@ const config: Config = {
         heading: ["var(--font-heading)", "sans-serif"],
         body: ["var(--font-body)", "sans-serif"],
         handwriting: ["var(--font-handwriting)", "cursive"],
+        display: ["var(--font-display)", "sans-serif"],
       },
     },
   },

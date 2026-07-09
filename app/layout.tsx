@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Itim, Quicksand } from "next/font/google";
+import { Inter, Itim, Fredoka, Quicksand } from "next/font/google";
 import "./globals.css";
 
 const quicksand = Quicksand({
@@ -21,6 +21,12 @@ const itim = Itim({
   display: "swap",
 });
 
+const fredoka = Fredoka({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-display",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "GratiPin",
   description: "Nền tảng ghi nhận, biết ơn và lưu giữ kỷ niệm công ty",
@@ -38,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${quicksand.variable} ${inter.variable} ${itim.variable} font-body antialiased`}>
+      <body className={`${quicksand.variable} ${inter.variable} ${itim.variable} ${fredoka.variable} font-body antialiased`}>
         {children}
       </body>
     </html>

@@ -1,5 +1,12 @@
 export type BoardSkin = "wood" | "felt" | "linen" | "chalkboard";
-export type PinTemplate = "note" | "polaroid" | "floral" | "washi";
+export type PinTemplate =
+  | "note"
+  | "polaroid"
+  | "floral"
+  | "washi"
+  | "garden"
+  | "sunshine"
+  | "love";
 
 export const SKIN_LABELS: Record<BoardSkin, string> = {
   wood: "Gỗ mộc",
@@ -13,7 +20,20 @@ export const TEMPLATE_LABELS: Record<PinTemplate, string> = {
   polaroid: "Polaroid kỷ niệm",
   floral: "Thiệp hoa lá",
   washi: "Washi tape",
+  garden: "Vườn Xanh",
+  sunshine: "Nắng Ấm",
+  love: "Thư Yêu Thương",
 };
+
+export const ALL_TEMPLATES: PinTemplate[] = [
+  "note",
+  "polaroid",
+  "floral",
+  "washi",
+  "garden",
+  "sunshine",
+  "love",
+];
 
 const SKIN_STYLES: Record<BoardSkin, string> = {
   wood: "bg-[#c4a574] bg-[radial-gradient(ellipse_at_center,_rgba(139,90,43,0.15)_0%,_transparent_70%)] shadow-inner",

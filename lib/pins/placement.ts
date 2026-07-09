@@ -11,6 +11,9 @@ const ROTATION_RANGE: Record<PinTemplate, [number, number]> = {
   polaroid: [-6, 6],
   floral: [-1, 1],
   washi: [-8, 8],
+  garden: [-2, 2],
+  sunshine: [-4, 4],
+  love: [-3, 3],
 };
 
 export function randomRotationForTemplate(template: PinTemplate): number {

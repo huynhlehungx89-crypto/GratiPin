@@ -4,7 +4,8 @@ import { useState } from "react";
 import { createPin } from "@/lib/actions/pins";
 import { createClient } from "@/lib/supabase/client";
 import { resizeImageFile } from "@/lib/utils/image";
-import { TEMPLATE_LABELS, type PinTemplate } from "@/lib/utils/board";
+import { TemplatePicker } from "./TemplatePicker";
+import type { PinTemplate } from "@/lib/utils/board";
 
 type BoardOption = { id: string; label: string };
 type MemberOption = { id: string; name: string };
@@ -121,50 +122,22 @@ export function CreatePinForm({
         placeholder="Viết lời biết ơn, kỷ niệm..."
         className="mb-3 w-full rounded-lg border border-umber/20 px-3 py-2"
       />
-      <div className="mb-3 grid gap-3 sm:grid-cols-2">
-        <div>
-          <label className="text-sm">Template</label>
-          <select
-            value={template}
-            onChange={(e) => handleTemplateChange(e.target.value as PinTemplate)}
-            className="mt-1 w-full rounded-lg border border-umber/20 px-3 py-2"
-          >
-            {(Object.keys(TEMPLATE_LABELS) as PinTemplate[]).map((t) => (
-              <option
-                key={t}
-                value={t}
-                disabled={t === "polaroid" && !hasImage}
-                title={
-                  t === "polaroid" && !hasImage
-                    ? "Cần thêm ảnh để dùng mẫu Polaroid"
-                    : undefined
-                }
-              >
-                {TEMPLATE_LABELS[t]}
-                {t === "polaroid" && !hasImage ? " (cần ảnh)" : ""}
-              </option>
-            ))}
-          </select>
-          {!hasImage && (
-            <p className="mt-1 text-xs text-umber/50" title="Cần thêm ảnh để dùng mẫu Polaroid">
-              Cần thêm ảnh để dùng mẫu Polaroid
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="text-sm">Bảng đích</label>
-          <select
-            name="boardId"
-            defaultValue={defaultBoardId}
-            className="mt-1 w-full rounded-lg border border-umber/20 px-3 py-2"
-          >
-            {boards.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="mb-3">
+        <TemplatePicker value={template} onChange={handleTemplateChange} hasImage={hasImage} />
+      </div>
+      <div className="mb-3">
+        <label className="text-sm">Bảng đích</label>
+        <select
+          name="boardId"
+          defaultValue={defaultBoardId}
+          className="mt-1 w-full rounded-lg border border-umber/20 px-3 py-2"
+        >
+          {boards.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.label}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="mb-3">
         <label className="text-sm">Người nhận (tuỳ chọn)</label>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>GratiPin — Pin Template Reference (7 mẫu, chờ duyệt)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Itim&family=Fredoka:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --cream:#FBF3E7; --peach:#F4A99B; --butter:#F2C879; --mint:#A9CBB7; --umber:#4A3B32; }
+  body{ margin:0; padding:40px 30px 80px; background:var(--cream); font-family:'Inter',sans-serif; color:var(--umber); }
+  h1{font-family:'Fredoka',sans-serif; font-size:22px; margin-bottom:4px;}
+  .note{color:#8a7a6c; font-size:13px; margin-bottom:10px;}
+  .status{font-size:12px; background:#fff3cd; color:#8a6d1a; padding:6px 12px; border-radius:6px; display:inline-block; margin-bottom:30px;}
+  .tpl-block{margin-bottom:46px;}
+  .tpl-title{font-family:'Fredoka',sans-serif; font-size:16px; margin:0 0 3px; color:#5c4437;}
+  .tpl-desc{font-size:12.5px; color:#8a7a6c; margin:0 0 14px; max-width:680px; line-height:1.5;}
+  .row{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start;}
+  .variant-label{font-size:10.5px; color:#a3937f; text-align:center; margin-top:6px; font-family:'Inter';}
+
+  .pin{ width:190px; position:relative; display:inline-block; filter:drop-shadow(0 6px 10px rgba(74,59,50,0.18)); }
+  .pin-content{padding:14px 14px 12px;}
+  .pin-thumb{ position:absolute; top:-9px; left:50%; transform:translateX(-50%); width:16px; height:16px; border-radius:50%; box-shadow:0 2px 3px rgba(0,0,0,.25); z-index:5; }
+
+  .tpl-note{ background:repeating-linear-gradient(180deg, transparent, transparent 21px, #e7dcc8 22px), #fffaf0; border-radius:2px; transform:rotate(-2deg); }
+  .tpl-note .pin-thumb{ background:radial-gradient(circle at 35% 35%, #ff8a7a, #d64545); }
+  .tpl-note .content-text{ font-family:'Itim',cursive; font-size:15.5px; line-height:1.5; color:#4A3B32; padding-top:6px; }
+  .tpl-note .meta{font-size:11px; color:#a3937f; margin-top:10px;}
+
+  .tpl-polaroid{ background:#fff; padding:9px 9px 0; border-radius:2px; transform:rotate(2.5deg); width:190px; }
+  .tpl-polaroid .pin-thumb{ background:radial-gradient(circle at 35% 35%, #ffd27a, #c9871f); }
+  .tpl-polaroid .photo{ width:100%; height:130px; object-fit:cover; display:block; background:#e9e2d6; }
+  .tpl-polaroid .caption{ font-family:'Itim',cursive; font-size:14.5px; text-align:center; padding:9px 6px 15px; color:#4A3B32; line-height:1.4; }
+
+  .tpl-floral{ background:linear-gradient(155deg, #fdeee7, #fbf3e7 60%); border:1px solid #f0d3c8; border-radius:10px; position:relative; overflow:hidden; transform:rotate(0.5deg); }
+  .tpl-floral::before{ content:""; position:absolute; inset:6px; border:1px solid #f5ddd0; border-radius:6px; pointer-events:none; }
+  .tpl-floral .pin-thumb{ background:radial-gradient(circle at 35% 35%, #c9e3d1, #7fae8f); }
+  .tpl-floral .content-text{ font-family:'Fredoka',sans-serif; font-weight:500; font-size:14.5px; line-height:1.5; color:#5c4437; padding:14px 10px 6px; text-align:center; position:relative; z-index:2; }
+  .tpl-floral .meta{font-size:11px; color:#a3937f; text-align:center; padding-bottom:18px; position:relative; z-index:2;}
+  .tpl-floral .corner{position:absolute; width:30px; height:30px; opacity:.9; z-index:2;}
+  .tpl-floral .corner.tl{top:4px; left:4px;} .tpl-floral .corner.br{bottom:4px; right:4px; transform:rotate(180deg);}
+  .tpl-floral .bottom-grass{ position:absolute; bottom:0; left:0; width:100%; height:14px; opacity:.9; z-index:1; }
+
+  .tpl-washi{ background:radial-gradient(circle at 20% 30%, rgba(0,0,0,.02) 1px, transparent 1.5px) 0 0/14px 14px, #f1e4cf; border-radius:3px; position:relative; transform:rotate(3deg); }
+  .tpl-washi .washi-strip{ position:absolute; height:20px; width:64px; background:repeating-linear-gradient(45deg, rgba(169,203,183,.75) 0 6px, rgba(244,169,155,.75) 6px 12px); opacity:.85; box-shadow:0 1px 2px rgba(0,0,0,.12); }
+  .tpl-washi .washi-strip.a{ top:-9px; left:-12px; transform:rotate(-40deg); } .tpl-washi .washi-strip.b{ bottom:-9px; right:-12px; transform:rotate(-40deg); }
+  .tpl-washi .content-text{ font-family:'Itim',cursive; font-size:15.5px; line-height:1.5; color:#4A3B32; padding-top:8px; }
+  .tpl-washi .meta{font-size:11px; color:#a3937f; margin-top:10px;}
+
+  .tpl-garden{ background:linear-gradient(180deg, #eef7f0 0%, #dcedde 100%); border-radius:12px; position:relative; overflow:hidden; transform:rotate(-1deg); }
+  .tpl-garden .pin-thumb{ background:radial-gradient(circle at 35% 35%, #d6e8a8, #8fae5a); }
+  .tpl-garden .grass{ position:absolute; bottom:0; left:0; width:100%; height:22px; }
+  .tpl-garden .content-text{ font-family:'Fredoka',sans-serif; font-weight:500; font-size:14.5px; line-height:1.5; color:#3f5c46; padding:16px 12px 30px; text-align:center; }
+  .tpl-garden .meta{font-size:11px; color:#7a9382; text-align:center; margin-top:-20px; padding-bottom:26px;}
+  .tpl-garden .circle-photo{ width:88px; height:88px; border-radius:50%; object-fit:cover; border:4px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.12); display:block; margin:14px auto 4px; }
+
+  .tpl-sunshine{ background:radial-gradient(circle at 18% 18%, #fff6da 0%, #F2C879 55%, #eaa94f 100%); border-radius:10px; position:relative; overflow:hidden; transform:rotate(2deg); }
+  .tpl-sunshine .pin-thumb{ background:radial-gradient(circle at 35% 35%, #fff, #F2C879); }
+  .tpl-sunshine .glow{ position:absolute; top:-46px; left:-46px; width:150px; height:150px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,246,218,0.65) 40%, transparent 72%); filter:blur(3px); z-index:1; }
+  .tpl-sunshine .rays{ position:absolute; top:-30px; left:-30px; width:110px; height:110px; opacity:.8; z-index:1; }
+  .tpl-sunshine .sparkle{ position:absolute; font-size:10px; color:#fff; opacity:.85; z-index:1; }
+  .tpl-sunshine .content-text{ font-family:'Fredoka',sans-serif; font-weight:600; font-size:14.5px; line-height:1.5; color:#6b4a1c; padding:24px 12px 14px; text-align:center; position:relative; z-index:2; }
+  .tpl-sunshine .meta{font-size:11px; color:#8a6018; text-align:center; padding-bottom:12px; position:relative; z-index:2;}
+  .tpl-sunshine .photo{ width:calc(100% - 20px); margin:0 10px 12px; height:100px; object-fit:cover; border-radius:8px; box-shadow:0 0 0 4px #fff, 0 4px 10px rgba(180,120,20,.25); display:block; position:relative; z-index:2; }
+
+  .tpl-love{ background:#fff8f6; border-radius:4px; position:relative; padding-top:16px; transform:rotate(-2deg); overflow:hidden; }
+  .tpl-love .hearts-bg{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .tpl-love .hearts-bg span{ position:absolute; color:#f4a99b; }
+  .tpl-love .flap{ position:absolute; top:0; left:0; width:100%; height:38px; background:linear-gradient(135deg, transparent 50%, #fbe4dd 50%) top left/50% 100% no-repeat, linear-gradient(225deg, transparent 50%, #fbe4dd 50%) top right/50% 100% no-repeat; z-index:1; }
+  .tpl-love .seal{ position:absolute; top:22px; left:50%; transform:translateX(-50%); width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 35% 35%, #f4a99b, #d6685a); display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); z-index:5; }
+  .tpl-love .content-text{ font-family:'Itim',cursive; font-size:15.5px; line-height:1.55; color:#5c4437; padding:20px 16px 14px; text-align:center; position:relative; z-index:2; }
+  .tpl-love .meta{font-size:11px; color:#a3937f; text-align:center; padding-bottom:12px; position:relative; z-index:2;}
+  .tpl-love .photo{ width:calc(100% - 32px); margin:0 16px 12px; height:90px; object-fit:cover; border-radius:6px; border:3px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.12); display:block; position:relative; z-index:2; }
+</style>
+</head>
+<body>
+
+<h1>GratiPin — Tham chiếu 7 Pin Template</h1>
+<div class="note">4 mẫu cũ + 3 mẫu mới (Vườn Xanh, Nắng Ấm, Thư Yêu Thương) — mỗi mẫu test với nội dung ngắn/dài để xem cách xử lý tràn chữ.</div>
+<div class="status">⏳ Đang chờ duyệt — chưa cập nhật SPEC/CHANGELOG chính thức</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">1. Giấy note viết tay</div>
+  <div class="tpl-desc">Giấy kẻ ngang, chữ viết tay (Itim), 1 đinh ghim đỏ trên đầu, xoay nhẹ -3°→3°. Không có ảnh → chỉ có giấy + chữ, không khối trống. Hợp lời cảm ơn ngắn, nhanh, đời thường.</div>
+  <div class="row">
+    <div><div class="pin tpl-note"><div class="pin-thumb"></div><div class="pin-content"><div class="content-text">Cảm ơn nha!</div><div class="meta">— Lan</div></div></div><div class="variant-label">ngắn, không ảnh</div></div>
+    <div><div class="pin tpl-note"><div class="pin-thumb"></div><div class="pin-content"><div class="content-text">Cảm ơn anh Đức đã thức tới khuya hỗ trợ debug cùng team hôm demo khách. Có anh trong team là may mắn của tụi em!</div><div class="meta">— Nam, Hà, Minh</div></div></div><div class="variant-label">dài, không ảnh</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">2. Polaroid kỷ niệm</div>
+  <div class="tpl-desc">Khung polaroid thật, viền dưới dày chứa chú thích viết tay. Bắt buộc phải có ảnh — không chọn được template này nếu chưa upload ảnh. Hợp ảnh team building, sự kiện.</div>
+  <div class="row">
+    <div><div class="pin tpl-polaroid"><div class="pin-thumb"></div><img class="photo" src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=380&h=300&fit=crop"><div class="caption">Đà Lạt 2025</div></div><div class="variant-label">chú thích ngắn</div></div>
+    <div><div class="pin tpl-polaroid"><div class="pin-thumb"></div><img class="photo" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=380&h=300&fit=crop"><div class="caption">Khoảnh khắc cả team cùng nhau ăn mừng release thành công sau 3 tháng cày cuốc</div></div><div class="variant-label">chú thích dài</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">3. Thiệp hoa lá</div>
+  <div class="tpl-desc">Gradient pastel đào-kem, hoa lá SVG 2 góc đối diện + dải cỏ hoa nhỏ dọc viền dưới, viền đôi trang trọng nhẹ, font Fredoka. Gần như không xoay — giữ cảm giác chỉn chu như thiệp thật. Hợp lời chúc kỷ niệm làm việc, mừng thăng chức.</div>
+  <div class="row">
+    <div><div class="pin tpl-floral"><div class="pin-thumb"></div><svg class="corner tl" viewBox="0 0 40 40"><path d="M2 20 Q10 4 24 10 Q14 14 12 24 Q6 18 2 20Z" fill="#A9CBB7"/><circle cx="14" cy="12" r="3" fill="#F4A99B"/></svg><svg class="corner br" viewBox="0 0 40 40"><path d="M2 20 Q10 4 24 10 Q14 14 12 24 Q6 18 2 20Z" fill="#A9CBB7"/><circle cx="14" cy="12" r="3" fill="#F4A99B"/></svg><div class="content-text">Chúc mừng 1 năm gắn bó!</div><div class="meta">Gửi Minh</div><svg class="bottom-grass" viewBox="0 0 190 14" preserveAspectRatio="none"><path d="M0 14 L0 8 Q6 3 9 8 L11 14 Q16 4 20 8 L23 14 Q28 3 32 9 L35 14 Q40 4 44 8 L47 14 Q52 3 56 9 L59 14 L95 14 Q99 3 103 9 L106 14 Q111 4 115 8 L118 14 Q123 3 127 9 L130 14 Q135 4 139 8 L142 14 Q147 3 151 9 L154 14 Q159 4 163 8 L166 14 Q171 3 175 9 L178 14 L190 14 L190 14 L0 14Z" fill="#A9CBB7"/><circle cx="20" cy="10" r="2" fill="#F4A99B"/><circle cx="106" cy="9" r="2" fill="#F2C879"/><circle cx="163" cy="9" r="2" fill="#F4A99B"/></svg></div><div class="variant-label">ngắn</div></div>
+    <div><div class="pin tpl-floral"><div class="pin-thumb"></div><svg class="corner tl" viewBox="0 0 40 40"><path d="M2 20 Q10 4 24 10 Q14 14 12 24 Q6 18 2 20Z" fill="#A9CBB7"/><circle cx="14" cy="12" r="3" fill="#F4A99B"/></svg><svg class="corner br" viewBox="0 0 40 40"><path d="M2 20 Q10 4 24 10 Q14 14 12 24 Q6 18 2 20Z" fill="#A9CBB7"/><circle cx="14" cy="12" r="3" fill="#F4A99B"/></svg><div class="content-text">Chúc mừng chị Hà tròn 3 năm đồng hành cùng công ty — từ ngày đầu bỡ ngỡ đến giờ là trụ cột team Vận hành!</div><div class="meta">Cả phòng Vận hành</div><svg class="bottom-grass" viewBox="0 0 190 14" preserveAspectRatio="none"><path d="M0 14 L0 8 Q6 3 9 8 L11 14 Q16 4 20 8 L23 14 Q28 3 32 9 L35 14 Q40 4 44 8 L47 14 Q52 3 56 9 L59 14 L95 14 Q99 3 103 9 L106 14 Q111 4 115 8 L118 14 Q123 3 127 9 L130 14 Q135 4 139 8 L142 14 Q147 3 151 9 L154 14 Q159 4 163 8 L166 14 Q171 3 175 9 L178 14 L190 14 L190 14 L0 14Z" fill="#A9CBB7"/><circle cx="20" cy="10" r="2" fill="#F4A99B"/><circle cx="106" cy="9" r="2" fill="#F2C879"/><circle cx="163" cy="9" r="2" fill="#F4A99B"/></svg></div><div class="variant-label">dài</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">4. Washi tape</div>
+  <div class="tpl-desc">Giấy kraft, 2 dải washi tape caro dán chéo 2 góc thay cho đinh ghim, font viết tay, xoay rõ nhất (-8°→8°) — cảm giác scrapbook phóng khoáng, tự do. Hợp kỷ niệm vui, đời thường.</div>
+  <div class="row">
+    <div><div class="pin tpl-washi"><div class="washi-strip a"></div><div class="washi-strip b"></div><div class="pin-content"><div class="content-text">Hại não ghê 😄</div><div class="meta">— Ẩn danh</div></div></div><div class="variant-label">ngắn</div></div>
+    <div><div class="pin tpl-washi"><div class="washi-strip a"></div><div class="washi-strip b"></div><div class="pin-content"><div class="content-text">Nhớ hoài buổi họp "não to" kéo dài từ 2h chiều tới 9h tối mà cuối cùng vẫn chưa ra được quyết định 😂 nhưng vui!</div><div class="meta">— Ẩn danh</div></div></div><div class="variant-label">dài</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">5. Vườn Xanh <span style="color:#7fae8f;">— MỚI</span></div>
+  <div class="tpl-desc">Nền xanh mint dịu, dải cỏ mọc dọc viền <b>dưới</b> thẻ (khác Floral ở góc), ảnh (nếu có) đặt trong khung <b>tròn</b> như cửa sổ nhỏ. Cảm giác mộc mạc, tươi mới — hợp lời chúc sức khoẻ, động viên, khích lệ tinh thần.</div>
+  <div class="row">
+    <div><div class="pin tpl-garden"><div class="pin-thumb"></div><div class="content-text">Cố lên nha!</div><svg class="grass" viewBox="0 0 190 22" preserveAspectRatio="none"><path d="M0 22 L0 14 Q4 8 6 14 L8 22 Q10 10 13 14 L15 22 Q18 6 21 14 L23 22 Q26 12 29 14 L31 22 Q35 8 38 14 L40 22 Q44 10 47 14 L49 22 Q52 8 55 16 L57 22 L62 22 Q65 9 68 15 L70 22 Q74 10 77 14 L79 22 Q83 8 86 14 L88 22 Q92 12 95 14 L97 22 Q101 8 104 14 L106 22 Q109 10 112 14 L114 22 Q118 8 121 15 L123 22 L128 22 Q131 9 134 14 L136 22 Q140 10 143 14 L145 22 Q149 8 152 14 L154 22 Q158 12 161 14 L163 22 Q167 8 170 14 L172 22 Q176 10 179 15 L181 22 L190 22 L190 22 L0 22Z" fill="#8fae5a"/></svg></div><div class="variant-label">ngắn, không ảnh</div></div>
+    <div><div class="pin tpl-garden"><div class="pin-thumb"></div><img class="circle-photo" src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=200&h=200&fit=crop"><div class="content-text" style="padding-top:0;">Mong bạn sớm khoẻ lại, cả team đang chờ bạn quay lại đấy!</div><div class="meta">— Cả team</div><svg class="grass" viewBox="0 0 190 22" preserveAspectRatio="none"><path d="M0 22 L0 14 Q4 8 6 14 L8 22 Q10 10 13 14 L15 22 Q18 6 21 14 L23 22 Q26 12 29 14 L31 22 Q35 8 38 14 L40 22 Q44 10 47 14 L49 22 Q52 8 55 16 L57 22 L62 22 Q65 9 68 15 L70 22 Q74 10 77 14 L79 22 Q83 8 86 14 L88 22 Q92 12 95 14 L97 22 Q101 8 104 14 L106 22 Q109 10 112 14 L114 22 Q118 8 121 15 L123 22 L128 22 Q131 9 134 14 L136 22 Q140 10 143 14 L145 22 Q149 8 152 14 L154 22 Q158 12 161 14 L163 22 Q167 8 170 14 L172 22 Q176 10 179 15 L181 22 L190 22 L190 22 L0 22Z" fill="#8fae5a"/></svg></div><div class="variant-label">dài, có ảnh tròn</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">6. Nắng Ấm <span style="color:#c9871f;">— MỚI</span></div>
+  <div class="tpl-desc">Gradient vàng-cam ấm áp, mặt trời rạng rỡ có quầng sáng lan toả + tia nắng toả từ góc trên-trái + vài đốm lấp lánh nhỏ, font Fredoka đậm. Năng lượng, tích cực — hợp lời khen ngợi thành tích, ăn mừng deal thành công, cột mốc lớn.</div>
+  <div class="row">
+    <div><div class="pin tpl-sunshine"><div class="glow"></div><div class="pin-thumb"></div><svg class="rays" viewBox="0 0 110 110"><circle cx="20" cy="20" r="11" fill="#fff"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="20" y1="20" x2="20" y2="0"/><line x1="20" y1="20" x2="40" y2="20"/><line x1="20" y1="20" x2="35" y2="5"/><line x1="20" y1="20" x2="5" y2="35"/><line x1="20" y1="20" x2="35" y2="35"/><line x1="20" y1="20" x2="5" y2="5"/><line x1="20" y1="20" x2="0" y2="20"/><line x1="20" y1="20" x2="20" y2="40"/></g></svg><span class="sparkle" style="top:36px; left:70px;">✦</span><span class="sparkle" style="top:12px; left:92px; font-size:8px;">✦</span><div class="content-text">Đỉnh của chóp! 🎉</div><div class="meta">— Sếp Đức</div></div><div class="variant-label">ngắn, không ảnh</div></div>
+    <div><div class="pin tpl-sunshine"><div class="glow"></div><div class="pin-thumb"></div><svg class="rays" viewBox="0 0 110 110"><circle cx="20" cy="20" r="11" fill="#fff"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="20" y1="20" x2="20" y2="0"/><line x1="20" y1="20" x2="40" y2="20"/><line x1="20" y1="20" x2="35" y2="5"/><line x1="20" y1="20" x2="5" y2="35"/><line x1="20" y1="20" x2="35" y2="35"/><line x1="20" y1="20" x2="5" y2="5"/><line x1="20" y1="20" x2="0" y2="20"/><line x1="20" y1="20" x2="20" y2="40"/></g></svg><span class="sparkle" style="top:36px; left:70px;">✦</span><span class="sparkle" style="top:12px; left:92px; font-size:8px;">✦</span><div class="content-text">Chúc mừng team Sales đã chốt được deal lớn nhất quý — cả năm chờ đợi khoảnh khắc này!</div><img class="photo" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&h=200&fit=crop"></div><div class="variant-label">dài, có ảnh</div></div>
+  </div>
+</div>
+
+<div class="tpl-block">
+  <div class="tpl-title">7. Thư Yêu Thương <span style="color:#d6685a;">— MỚI</span></div>
+  <div class="tpl-desc">Dáng phong thư — nắp phong bì gấp ở mép trên (CSS gradient chéo 2 bên), con dấu trái tim ở giữa nắp, vài trái tim nhỏ mờ bay lên trong nền. Chữ viết tay mềm mại. Hợp lời quan tâm cá nhân, lời cảm ơn ấm áp mang tính tình cảm hơn (không chỉ công việc).</div>
+  <div class="row">
+    <div><div class="pin tpl-love"><div class="hearts-bg"><span style="top:60%; left:10%; font-size:14px; opacity:.35; transform:rotate(-10deg);">♥</span><span style="top:75%; left:70%; font-size:10px; opacity:.3; transform:rotate(8deg);">♥</span><span style="top:40%; left:80%; font-size:12px; opacity:.25;">♥</span></div><div class="flap"></div><div class="seal">♥</div><div class="content-text">Cảm ơn vì luôn ở đó ❤️</div><div class="meta">— Hà</div></div><div class="variant-label">ngắn, không ảnh</div></div>
+    <div><div class="pin tpl-love"><div class="hearts-bg"><span style="top:55%; left:8%; font-size:14px; opacity:.3; transform:rotate(-10deg);">♥</span><span style="top:78%; left:75%; font-size:10px; opacity:.28; transform:rotate(8deg);">♥</span><span style="top:35%; left:85%; font-size:11px; opacity:.22;">♥</span></div><div class="flap"></div><div class="seal">♥</div><div class="content-text">Cảm ơn chị đã luôn lắng nghe và động viên em những lúc khó khăn nhất trong công việc lẫn cuộc sống. Có chị là điều may mắn nhất của em ở công ty này.</div><div class="meta">— Em Lan</div><img class="photo" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=200&fit=crop"></div><div class="variant-label">dài, có ảnh</div></div>
+  </div>
+</div>
+
+</body>
+</html>
