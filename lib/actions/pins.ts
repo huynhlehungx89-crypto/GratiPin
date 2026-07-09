@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { findOpenPinPosition, randomRotationForTemplate } from "@/lib/pins/placement";
 
 const pinSchema = z.object({
   companySlug: z.string(),
@@ -53,6 +54,14 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
     return { error: "Bảng này đã lưu trữ, không thể đăng ghim mới" };
   }
 
+  const { data: existingPins } = await supabase
+    .from("pins")
+    .select("position_x, position_y")
+    .eq("board_id", board.id);
+
+  const { x, y } = findOpenPinPosition(existingPins ?? []);
+  const rotation = randomRotationForTemplate(parsed.data.template);
+
   const { error } = await supabase.from("pins").insert({
     company_id: company.id,
     board_id: board.id,
@@ -62,10 +71,16 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
     content: parsed.data.content,
     image_url: parsed.data.imageUrl || null,
     template: parsed.data.template,
+    position_x: x,
+    position_y: y,
+    rotation,
   });
 
   if (error) return { error: error.message };
 
   revalidatePath(`/${company.slug}/board`);
+  if (board.department_id) {
+    revalidatePath(`/${company.slug}/board/${board.department_id}`);
+  }
   return { success: true };
 }
