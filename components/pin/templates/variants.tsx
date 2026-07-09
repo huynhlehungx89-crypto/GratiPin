@@ -23,16 +23,25 @@ export function PinThumb({ gradient }: PinThumbProps) {
 export function PinMeta({
   authorLabel,
   recipientName,
+  isEdited,
+  editedAt,
   className = "",
 }: {
   authorLabel: string;
   recipientName?: string | null;
+  isEdited?: boolean;
+  editedAt?: string | null;
   className?: string;
 }) {
   return (
     <div className={`text-[11px] text-[#a3937f] ${className}`}>
       <p>{authorLabel}</p>
       {recipientName && <p>→ {recipientName}</p>}
+      {isEdited && editedAt && (
+        <p className="mt-1 text-[10px] text-umber/45">
+          (đã chỉnh sửa · {new Date(editedAt).toLocaleString("vi-VN")})
+        </p>
+      )}
     </div>
   );
 }
@@ -56,20 +65,36 @@ export type PinVariantProps = {
     content: string;
     image_url: string | null;
     recipient_name?: string | null;
+    is_edited?: boolean;
+    edited_at?: string | null;
   };
   authorLabel: string;
   companyLogoUrl?: string | null;
   onClick?: () => void;
+  compact?: boolean;
 };
+
+function metaProps(pin: PinVariantProps["pin"], authorLabel: string, className?: string) {
+  return {
+    authorLabel,
+    recipientName: pin.recipient_name,
+    isEdited: pin.is_edited,
+    editedAt: pin.edited_at,
+    className,
+  };
+}
 
 const PIN_BASE =
   "relative inline-block w-[190px] cursor-pointer transition hover:scale-105 filter drop-shadow-[0_6px_10px_rgba(74,59,50,0.18)]";
+const PIN_BASE_COMPACT =
+  "relative inline-block w-[190px] filter drop-shadow-[0_4px_8px_rgba(74,59,50,0.15)] pointer-events-none";
+const pinBase = (compact?: boolean) => (compact ? PIN_BASE_COMPACT : PIN_BASE);
 
-export function NotePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function NotePinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} rounded-sm bg-[#fffaf0]`}
+      className={`${pinBase(compact)} rounded-sm bg-[#fffaf0]`}
       style={{
         backgroundImage:
           "repeating-linear-gradient(180deg, transparent, transparent 21px, #e7dcc8 22px)",
@@ -90,19 +115,19 @@ export function NotePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: Pi
             className="absolute bottom-3 right-2 h-14 w-14 rotate-3 rounded border-2 border-white object-cover shadow-sm"
           />
         )}
-        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} className="mt-2.5" />
+        <PinMeta {...metaProps(pin, authorLabel, "mt-2.5")} />
       </div>
       <ExportLogo companyLogoUrl={companyLogoUrl} />
     </article>
   );
 }
 
-export function PolaroidPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function PolaroidPinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   if (!pin.image_url) return null;
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} rounded-sm bg-white pb-0 pt-2`}
+      className={`${pinBase(compact)} rounded-sm bg-white pb-0 pt-2`}
       data-pin-id={pin.id}
       data-pin-export
     >
@@ -113,18 +138,18 @@ export function PolaroidPinVariant({ pin, authorLabel, companyLogoUrl, onClick }
         {pin.content}
       </p>
       <div className="px-2 pb-2">
-        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} />
+        <PinMeta {...metaProps(pin, authorLabel)} />
       </div>
       <ExportLogo companyLogoUrl={companyLogoUrl} />
     </article>
   );
 }
 
-export function FloralPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function FloralPinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} overflow-hidden rounded-[10px] border border-[#f0d3c8] bg-gradient-to-br from-[#fdeee7] to-[#fbf3e7] to-60%`}
+      className={`${pinBase(compact)} overflow-hidden rounded-[10px] border border-[#f0d3c8] bg-gradient-to-br from-[#fdeee7] to-[#fbf3e7] to-60%`}
       data-pin-id={pin.id}
       data-pin-export
     >
@@ -144,22 +169,18 @@ export function FloralPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: 
       <p className="relative z-[2] whitespace-pre-wrap break-words px-2.5 pb-1.5 pt-3.5 text-center font-display text-[14.5px] font-medium leading-normal text-[#5c4437]">
         {pin.content}
       </p>
-      <PinMeta
-        authorLabel={authorLabel}
-        recipientName={pin.recipient_name}
-        className="relative z-[2] pb-[18px] text-center"
-      />
+      <PinMeta {...metaProps(pin, authorLabel, "relative z-[2] pb-[18px] text-center")} />
       <FloralBottomGrassSvg className="absolute bottom-0 left-0 z-[1] h-3.5 w-full opacity-90" />
       <ExportLogo companyLogoUrl={companyLogoUrl} />
     </article>
   );
 }
 
-export function WashiPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function WashiPinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} rounded-sm bg-[#f1e4cf]`}
+      className={`${pinBase(compact)} rounded-sm bg-[#f1e4cf]`}
       style={{
         backgroundImage:
           "radial-gradient(circle at 20% 30%, rgba(0,0,0,0.02) 1px, transparent 1.5px)",
@@ -196,18 +217,18 @@ export function WashiPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: P
             className="relative mt-2 max-h-24 w-4/5 -rotate-2 border-4 border-white object-cover shadow"
           />
         )}
-        <PinMeta authorLabel={authorLabel} recipientName={pin.recipient_name} className="mt-2.5" />
+        <PinMeta {...metaProps(pin, authorLabel, "mt-2.5")} />
       </div>
       <ExportLogo companyLogoUrl={companyLogoUrl} />
     </article>
   );
 }
 
-export function GardenPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function GardenPinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} overflow-hidden rounded-xl bg-gradient-to-b from-[#eef7f0] to-[#dcedde]`}
+      className={`${pinBase(compact)} overflow-hidden rounded-xl bg-gradient-to-b from-[#eef7f0] to-[#dcedde]`}
       data-pin-id={pin.id}
       data-pin-export
     >
@@ -226,9 +247,11 @@ export function GardenPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: 
         {pin.content}
       </p>
       <PinMeta
-        authorLabel={authorLabel}
-        recipientName={pin.recipient_name}
-        className={`text-center text-[#7a9382] ${pin.image_url ? "-mt-5 pb-[26px]" : "pb-[30px]"}`}
+        {...metaProps(
+          pin,
+          authorLabel,
+          `text-center text-[#7a9382] ${pin.image_url ? "-mt-5 pb-[26px]" : "pb-[30px]"}`
+        )}
       />
       <GardenGrassSvg className="absolute bottom-0 left-0 h-[22px] w-full" />
       <ExportLogo companyLogoUrl={companyLogoUrl} />
@@ -236,11 +259,11 @@ export function GardenPinVariant({ pin, authorLabel, companyLogoUrl, onClick }: 
   );
 }
 
-export function SunshinePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function SunshinePinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} overflow-hidden rounded-[10px] bg-[radial-gradient(circle_at_18%_18%,#fff6da_0%,#F2C879_55%,#eaa94f_100%)]`}
+      className={`${pinBase(compact)} overflow-hidden rounded-[10px] bg-[radial-gradient(circle_at_18%_18%,#fff6da_0%,#F2C879_55%,#eaa94f_100%)]`}
       data-pin-id={pin.id}
       data-pin-export
     >
@@ -266,11 +289,7 @@ export function SunshinePinVariant({ pin, authorLabel, companyLogoUrl, onClick }
       <p className="relative z-[2] whitespace-pre-wrap break-words px-3 pt-6 text-center font-display text-[14.5px] font-semibold leading-normal text-[#6b4a1c]">
         {pin.content}
       </p>
-      <PinMeta
-        authorLabel={authorLabel}
-        recipientName={pin.recipient_name}
-        className="relative z-[2] px-3 pb-2 text-center text-[#8a6018]"
-      />
+      <PinMeta {...metaProps(pin, authorLabel, "relative z-[2] px-3 pb-2 text-center text-[#8a6018]")} />
       {pin.image_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -284,11 +303,11 @@ export function SunshinePinVariant({ pin, authorLabel, companyLogoUrl, onClick }
   );
 }
 
-export function LovePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: PinVariantProps) {
+export function LovePinVariant({ pin, authorLabel, companyLogoUrl, onClick, compact }: PinVariantProps) {
   return (
     <article
       onClick={onClick}
-      className={`${PIN_BASE} overflow-hidden rounded bg-[#fff8f6] pt-4`}
+      className={`${pinBase(compact)} overflow-hidden rounded bg-[#fff8f6] pt-4`}
       data-pin-id={pin.id}
       data-pin-export
     >
@@ -325,11 +344,7 @@ export function LovePinVariant({ pin, authorLabel, companyLogoUrl, onClick }: Pi
       <p className="relative z-[2] whitespace-pre-wrap break-words px-4 pb-3.5 pt-5 text-center font-handwriting text-[15.5px] leading-snug text-[#5c4437]">
         {pin.content}
       </p>
-      <PinMeta
-        authorLabel={authorLabel}
-        recipientName={pin.recipient_name}
-        className="relative z-[2] pb-3 text-center"
-      />
+      <PinMeta {...metaProps(pin, authorLabel, "relative z-[2] pb-3 text-center")} />
       {pin.image_url && (
         // eslint-disable-next-line @next/next/no-img-element
         <img

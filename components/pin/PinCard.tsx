@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PinDisplay } from "./PinCard.types";
 import { TEMPLATE_LABELS } from "@/lib/utils/board";
+import { EditPinModal } from "./EditPinModal";
 import { PinModal } from "./PinModal";
 import { SharePinButton } from "./SharePinButton";
 import { renderPinVariant } from "./templates/variants";
@@ -12,13 +13,18 @@ export type { PinDisplay } from "./PinCard.types";
 export function PinCard({
   pin,
   companyLogoUrl,
+  companySlug,
   canShare = true,
+  canEdit = false,
 }: {
   pin: PinDisplay;
   companyLogoUrl?: string | null;
+  companySlug?: string;
   canShare?: boolean;
+  canEdit?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const authorLabel =
     pin.is_anonymous && !pin.show_real_author
@@ -31,21 +37,37 @@ export function PinCard({
     pin,
     authorLabel,
     companyLogoUrl,
-    onClick: () => setOpen(true),
+    onClick: () => setViewOpen(true),
   };
 
   return (
     <>
       <div className="relative">
         {renderPinVariant(pin.template, variantProps)}
-        {canShare && !pin.is_hidden && (
-          <div className="mt-1 flex justify-end" onClick={(e) => e.stopPropagation()}>
+        <div className="mt-1 flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+          {canEdit && companySlug && (
+            <button
+              type="button"
+              onClick={() => setEditOpen(true)}
+              className="text-xs text-umber/70 hover:text-peach"
+            >
+              Sửa
+            </button>
+          )}
+          {canShare && !pin.is_hidden && (
             <SharePinButton pinId={pin.id} pin={pin} companyLogoUrl={companyLogoUrl} />
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      {open && (
-        <PinModal pin={pin} companyLogoUrl={companyLogoUrl} onClose={() => setOpen(false)} />
+      {viewOpen && (
+        <PinModal pin={pin} companyLogoUrl={companyLogoUrl} onClose={() => setViewOpen(false)} />
+      )}
+      {editOpen && companySlug && (
+        <EditPinModal
+          pin={pin}
+          companySlug={companySlug}
+          onClose={() => setEditOpen(false)}
+        />
       )}
     </>
   );

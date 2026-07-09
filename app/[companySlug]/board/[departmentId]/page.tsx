@@ -90,6 +90,8 @@ export default async function DepartmentBoardPage({
           <BoardPinLayer
             pins={pins.filter((p) => !p.is_hidden)}
             companyLogoUrl={company.logo_url}
+            companySlug={params.companySlug}
+            currentMemberId={member.id}
           />
         </Board>
       }

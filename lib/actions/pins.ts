@@ -88,3 +88,45 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
   }
   return { success: true };
 }
+
+const updatePinContentSchema = z.object({
+  companySlug: z.string(),
+  pinId: z.string().uuid(),
+  content: z.string().min(1, "Nội dung không được trống"),
+  template: z.enum(["note", "polaroid", "floral", "washi", "garden", "sunshine", "love"]),
+  imageUrl: z.string().url().optional().nullable(),
+});
+
+export async function updatePinContentAction(input: z.infer<typeof updatePinContentSchema>) {
+  const parsed = updatePinContentSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+
+  if (parsed.data.template === "polaroid" && !parsed.data.imageUrl) {
+    return { error: "Cần thêm ảnh để dùng mẫu Polaroid" };
+  }
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Chưa đăng nhập" };
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("id, slug")
+    .eq("slug", parsed.data.companySlug)
+    .single();
+  if (!company) return { error: "Không tìm thấy công ty" };
+
+  const { error } = await supabase.rpc("update_pin_content", {
+    pin_id: parsed.data.pinId,
+    new_content: parsed.data.content,
+    new_image_url: parsed.data.imageUrl ?? "",
+    new_template: parsed.data.template,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/${company.slug}/board`);
+  return { success: true };
+}

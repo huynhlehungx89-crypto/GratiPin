@@ -31,7 +31,7 @@ export default async function EmbedBoardPage({
     .from("pins")
     .select(
       `id, content, template, image_url, is_anonymous, is_hidden, created_at,
-       position_x, position_y, rotation,
+       position_x, position_y, rotation, is_edited, edited_at, author_member_id,
        author:members!pins_author_member_id_fkey(display_name),
        recipient:members!pins_recipient_member_id_fkey(display_name)`
     )
@@ -51,7 +51,10 @@ export default async function EmbedBoardPage({
       is_anonymous: pin.is_anonymous,
       is_hidden: pin.is_hidden,
       created_at: pin.created_at,
+      is_edited: pin.is_edited ?? false,
+      edited_at: pin.edited_at ?? null,
       author_name: pin.is_anonymous ? "Ẩn danh" : (author?.display_name ?? "—"),
+      author_member_id: pin.author_member_id,
       recipient_name: recipient?.display_name ?? null,
       position_x: pin.position_x,
       position_y: pin.position_y,
@@ -62,7 +65,13 @@ export default async function EmbedBoardPage({
   return (
     <main className="h-screen bg-cream">
       <Board skin={board.skin as BoardSkin} pins={displayPins}>
-        <BoardPinLayer pins={displayPins} companyLogoUrl={company?.logo_url ?? null} draggable={false} />
+        <BoardPinLayer
+          pins={displayPins}
+          companyLogoUrl={company?.logo_url ?? null}
+          companySlug=""
+          currentMemberId=""
+          draggable={false}
+        />
       </Board>
     </main>
   );

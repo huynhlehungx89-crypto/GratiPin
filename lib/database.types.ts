@@ -212,9 +212,11 @@ export type Database = {
           company_id: string
           content: string
           created_at: string
+          edited_at: string | null
           id: string
           image_url: string | null
           is_anonymous: boolean
+          is_edited: boolean
           is_hidden: boolean
           position_x: number
           position_y: number
@@ -228,9 +230,11 @@ export type Database = {
           company_id: string
           content: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean
+          is_edited?: boolean
           is_hidden?: boolean
           position_x?: number
           position_y?: number
@@ -244,9 +248,11 @@ export type Database = {
           company_id?: string
           content?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           image_url?: string | null
           is_anonymous?: boolean
+          is_edited?: boolean
           is_hidden?: boolean
           position_x?: number
           position_y?: number
@@ -291,6 +297,15 @@ export type Database = {
     }
     Functions: {
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
+      update_pin_content: {
+        Args: {
+          new_content: string
+          new_image_url: string
+          new_template: string
+          pin_id: string
+        }
+        Returns: undefined
+      }
       update_pin_position: {
         Args: { pin_id: string; rot: number; x: number; y: number }
         Returns: undefined

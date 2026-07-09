@@ -12,10 +12,16 @@ const Draggable = DraggableBase as ComponentType<Partial<DraggableProps>>;
 function DraggablePin({
   pin,
   companyLogoUrl,
+  companySlug,
+  currentMemberId,
 }: {
   pin: PinDisplay;
   companyLogoUrl: string | null;
+  companySlug: string;
+  currentMemberId: string;
 }) {
+  const canEdit =
+    !pin.is_hidden && pin.author_member_id === currentMemberId;
   const nodeRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -39,7 +45,13 @@ function DraggablePin({
           <span className="text-[10px] tracking-widest text-umber/40">⋯</span>
         </div>
         <div style={{ transform: `rotate(${pin.rotation}deg)` }}>
-          <PinCard pin={pin} companyLogoUrl={companyLogoUrl} canShare={!pin.is_hidden} />
+          <PinCard
+            pin={pin}
+            companyLogoUrl={companyLogoUrl}
+            companySlug={companySlug}
+            canShare={!pin.is_hidden}
+            canEdit={canEdit}
+          />
         </div>
       </div>
     </Draggable>
@@ -49,10 +61,14 @@ function DraggablePin({
 export function BoardPinLayer({
   pins,
   companyLogoUrl,
+  companySlug,
+  currentMemberId,
   draggable = true,
 }: {
   pins: PinDisplay[];
   companyLogoUrl: string | null;
+  companySlug: string;
+  currentMemberId: string;
   draggable?: boolean;
 }) {
   if (pins.length === 0) {
@@ -74,13 +90,27 @@ export function BoardPinLayer({
               style={{ left: pin.position_x, top: pin.position_y }}
             >
               <div style={{ transform: `rotate(${pin.rotation}deg)` }}>
-                <PinCard pin={pin} companyLogoUrl={companyLogoUrl} canShare={!pin.is_hidden} />
+                <PinCard
+                  pin={pin}
+                  companyLogoUrl={companyLogoUrl}
+                  companySlug={companySlug}
+                  canShare={!pin.is_hidden}
+                  canEdit={!pin.is_hidden && pin.author_member_id === currentMemberId}
+                />
               </div>
             </div>
           );
         }
 
-        return <DraggablePin key={pin.id} pin={pin} companyLogoUrl={companyLogoUrl} />;
+        return (
+          <DraggablePin
+            key={pin.id}
+            pin={pin}
+            companyLogoUrl={companyLogoUrl}
+            companySlug={companySlug}
+            currentMemberId={currentMemberId}
+          />
+        );
       })}
     </>
   );
