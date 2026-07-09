@@ -84,12 +84,46 @@ export type Database = {
           },
         ]
       }
+      board_admins: {
+        Row: {
+          board_id: string
+          created_at: string
+          member_id: string
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          member_id: string
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_admins_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_admins_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
           id: string
           logo_url: string | null
           name: string
+          onboarding_completed: boolean
           slug: string
         }
         Insert: {
@@ -97,6 +131,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          onboarding_completed?: boolean
           slug: string
         }
         Update: {
@@ -104,6 +139,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          onboarding_completed?: boolean
           slug?: string
         }
         Relationships: []
@@ -174,24 +210,30 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          default_board_id: string | null
           display_name: string
           id: string
+          is_owner: boolean
           role: string
           user_id: string
         }
         Insert: {
           company_id: string
           created_at?: string
+          default_board_id?: string | null
           display_name: string
           id?: string
+          is_owner?: boolean
           role: string
           user_id: string
         }
         Update: {
           company_id?: string
           created_at?: string
+          default_board_id?: string | null
           display_name?: string
           id?: string
+          is_owner?: boolean
           role?: string
           user_id?: string
         }
@@ -201,6 +243,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "members_default_board_id_fkey"
+            columns: ["default_board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
             referencedColumns: ["id"]
           },
         ]
@@ -221,6 +270,7 @@ export type Database = {
           position_x: number
           position_y: number
           recipient_member_id: string | null
+          reviewed_at: string | null
           rotation: number
           template: string
         }
@@ -239,6 +289,7 @@ export type Database = {
           position_x?: number
           position_y?: number
           recipient_member_id?: string | null
+          reviewed_at?: string | null
           rotation?: number
           template?: string
         }
@@ -257,6 +308,7 @@ export type Database = {
           position_x?: number
           position_y?: number
           recipient_member_id?: string | null
+          reviewed_at?: string | null
           rotation?: number
           template?: string
         }
@@ -297,6 +349,10 @@ export type Database = {
     }
     Functions: {
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
+      update_own_display_name: {
+        Args: { new_name: string }
+        Returns: undefined
+      }
       update_pin_content: {
         Args: {
           new_content: string

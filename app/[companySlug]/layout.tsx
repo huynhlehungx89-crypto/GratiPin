@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { logout } from "@/lib/actions/auth";
+import { CompanyNav } from "@/components/layout/CompanyNav";
+import { UserMenu } from "@/components/layout/UserMenu";
+import {
+  getNavBoardOptions,
+  resolveDefaultBoardHref,
+} from "@/lib/data/nav";
+import { canAccessModeration, getBoardAdminBoardIds } from "@/lib/data/boardAdmin";
+import { getUnreviewedPinCount } from "@/lib/data/moderation";
 
 export default async function CompanyLayout({
   children,
@@ -23,13 +30,39 @@ export default async function CompanyLayout({
   const { data: member } = user
     ? await supabase
         .from("members")
-        .select("role")
+        .select("id, role, default_board_id, display_name")
         .eq("user_id", user.id)
         .eq("company_id", company?.id ?? "")
         .maybeSingle()
     : { data: null };
 
-  const isAdmin = member?.role === "admin";
+  const isCompanyAdmin = member?.role === "admin";
+  const boardAdminBoardIds = member ? await getBoardAdminBoardIds(member.id) : [];
+  const canModerate = canAccessModeration(isCompanyAdmin, boardAdminBoardIds);
+
+  const boards =
+    company && member
+      ? await getNavBoardOptions(
+          params.companySlug,
+          company.id,
+          member.id,
+          isCompanyAdmin
+        )
+      : [];
+
+  const defaultBoardHref = resolveDefaultBoardHref(
+    params.companySlug,
+    boards,
+    member?.default_board_id ?? null
+  );
+
+  const unreviewedPinCount =
+    canModerate && company
+      ? await getUnreviewedPinCount(
+          company.id,
+          isCompanyAdmin ? null : boardAdminBoardIds
+        )
+      : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
@@ -47,42 +80,28 @@ export default async function CompanyLayout({
             <span className="font-heading text-lg text-umber">{company?.name}</span>
           </div>
           <nav className="flex flex-wrap items-center gap-3 text-sm">
-            <Link href={`/${params.companySlug}/board`} className="hover:text-peach">
-              Bảng ghim
-            </Link>
-            {isAdmin && (
-              <>
-                <Link
-                  href={`/${params.companySlug}/admin/members`}
-                  className="hover:text-peach"
-                >
-                  Thành viên
-                </Link>
-                <Link
-                  href={`/${params.companySlug}/admin/departments`}
-                  className="hover:text-peach"
-                >
-                  Phòng ban
-                </Link>
-                <Link
-                  href={`/${params.companySlug}/admin/pins`}
-                  className="hover:text-peach"
-                >
-                  Kiểm duyệt
-                </Link>
-                <Link
-                  href={`/${params.companySlug}/admin/settings`}
-                  className="hover:text-peach"
-                >
-                  Cài đặt
-                </Link>
-              </>
+            {member && (
+              <CompanyNav
+                companySlug={params.companySlug}
+                defaultBoardHref={defaultBoardHref}
+                boards={boards}
+                defaultBoardId={member.default_board_id}
+                isCompanyAdmin={isCompanyAdmin}
+                canModerate={canModerate}
+                unreviewedPinCount={unreviewedPinCount}
+              />
             )}
-            <form action={logout}>
-              <button type="submit" className="text-umber/70 hover:text-peach">
-                Đăng xuất
-              </button>
-            </form>
+            {!member && (
+              <Link href={`/${params.companySlug}/board`} className="hover:text-peach">
+                Bảng ghim
+              </Link>
+            )}
+            {member && (
+              <UserMenu
+                companySlug={params.companySlug}
+                displayName={member.display_name}
+              />
+            )}
           </nav>
         </div>
       </header>
