@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Board } from "@/components/board/Board";
 import { BoardNav } from "@/components/board/BoardNav";
 import { BoardCreatePinFab } from "@/components/board/BoardCreatePinFab";
@@ -14,10 +15,10 @@ import {
 } from "@/lib/data/board";
 import { canManageBoard, getBoardAdminBoardIds } from "@/lib/data/boardAdmin";
 
-export default async function CompanyBoardPage({
+export default async function BoardByIdPage({
   params,
 }: {
-  params: { companySlug: string };
+  params: { companySlug: string; boardId: string };
 }) {
   const { data: company } = await getCompanyBySlug(params.companySlug);
   if (!company) notFound();
@@ -27,6 +28,35 @@ export default async function CompanyBoardPage({
 
   const isCompanyAdmin = member.role === "admin";
   const boardAdminBoardIds = await getBoardAdminBoardIds(member.id);
+  const supabase = createClient();
+
+  const { data: board } = await supabase
+    .from("boards")
+    .select("id, skin, department_id, departments(status, name)")
+    .eq("company_id", company.id)
+    .eq("id", params.boardId)
+    .single();
+
+  if (!board) notFound();
+
+  if (!board.department_id) {
+    notFound();
+  }
+
+  const isBoardAdmin = boardAdminBoardIds.includes(board.id);
+
+  if (!isCompanyAdmin && !isBoardAdmin) {
+    const { data: access } = await supabase
+      .from("member_departments")
+      .select("member_id")
+      .eq("member_id", member.id)
+      .eq("department_id", board.department_id)
+      .maybeSingle();
+    if (!access) notFound();
+  }
+
+  const dept = board.departments as { status: string; name: string } | null;
+  const archived = dept?.status === "archived";
 
   const { companyBoard, deptBoards } = await getAccessibleBoards(
     company.id,
@@ -34,32 +64,25 @@ export default async function CompanyBoardPage({
     isCompanyAdmin
   );
 
-  if (!companyBoard) notFound();
-
-  const canModerate = canManageBoard(
-    isCompanyAdmin,
-    companyBoard.id,
-    boardAdminBoardIds
-  );
-  const showRealAuthor = canModerate;
-  const pins = await getBoardPins(companyBoard.id, showRealAuthor);
+  const canModerate = canManageBoard(isCompanyAdmin, board.id, boardAdminBoardIds);
+  const pins = await getBoardPins(board.id, canModerate);
   const members = await getCompanyMembers(company.id);
 
   const navItems = [
     {
-      id: companyBoard.id,
+      id: companyBoard!.id,
       label: "Bảng chung",
       href: `/${params.companySlug}/board`,
-      skin: companyBoard.skin as BoardSkin,
+      skin: companyBoard!.skin as BoardSkin,
     },
     ...deptBoards.map((b) => {
-      const dept = b.departments as { status: string; name: string } | null;
+      const d = b.departments as { status: string; name: string } | null;
       return {
         id: b.id,
-        label: dept?.name ?? "Phòng ban",
+        label: d?.name ?? "Phòng ban",
         href: `/${params.companySlug}/board/${b.id}`,
         skin: b.skin as BoardSkin,
-        archived: dept?.status === "archived",
+        archived: d?.status === "archived",
       };
     }),
   ];
@@ -69,18 +92,20 @@ export default async function CompanyBoardPage({
 
   return (
     <BoardPageLayout
+      title={dept?.name}
       nav={
         <BoardNav
           items={navItems}
-          currentId={companyBoard.id}
+          currentId={board.id}
           companySlug={params.companySlug}
           canManageCurrentBoard={canModerate}
         />
       }
       board={
         <Board
-          key={companyBoard.skin}
-          skin={companyBoard.skin as BoardSkin}
+          key={board.skin}
+          skin={board.skin as BoardSkin}
+          archived={archived}
           pins={pins}
         >
           <BoardPinLayer
@@ -97,7 +122,8 @@ export default async function CompanyBoardPage({
         companySlug={params.companySlug}
         boards={boardOptions}
         members={memberOptions}
-        defaultBoardId={companyBoard.id}
+        defaultBoardId={board.id}
+        disabled={archived}
       />
     </BoardPageLayout>
   );
