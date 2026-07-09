@@ -5,6 +5,7 @@ import type { DraggableProps } from "react-draggable";
 import DraggableBase from "react-draggable";
 import type { PinDisplay } from "@/components/pin/PinCard";
 import { PinCard } from "@/components/pin/PinCard";
+import { updatePinPosition } from "@/lib/pins/updatePosition";
 
 const Draggable = DraggableBase as ComponentType<Partial<DraggableProps>>;
 
@@ -20,13 +21,23 @@ function DraggablePin({
   return (
     <Draggable
       nodeRef={nodeRef}
+      handle=".pin-drag-handle"
       defaultPosition={{ x: pin.position_x, y: pin.position_y }}
       bounds="parent"
+      onStop={(_e, data) => {
+        void updatePinPosition(pin.id, data.x, data.y, pin.rotation);
+      }}
     >
       <div
         ref={nodeRef}
-        className="absolute left-0 top-0 z-10 cursor-grab active:cursor-grabbing"
+        className="absolute left-0 top-0 z-10"
       >
+        <div
+          className="pin-drag-handle mb-1 flex h-4 cursor-grab items-center justify-center rounded bg-umber/10 active:cursor-grabbing"
+          aria-hidden
+        >
+          <span className="text-[10px] tracking-widest text-umber/40">⋯</span>
+        </div>
         <div style={{ transform: `rotate(${pin.rotation}deg)` }}>
           <PinCard pin={pin} companyLogoUrl={companyLogoUrl} canShare={!pin.is_hidden} />
         </div>
