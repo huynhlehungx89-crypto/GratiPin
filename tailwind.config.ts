@@ -17,10 +17,9 @@ const config: Config = {
         umber: "#4A3B32",
       },
       fontFamily: {
-        heading: ["var(--font-heading)", "sans-serif"],
-        body: ["var(--font-body)", "sans-serif"],
-        handwriting: ["var(--font-handwriting)", "cursive"],
-        display: ["var(--font-display)", "sans-serif"],
+        heading: ["var(--font-heading)", "Fredoka", "sans-serif"],
+        body: ["var(--font-body)", "Inter", "sans-serif"],
+        handwriting: ["var(--font-handwriting)", "Itim", "cursive"],
       },
     },
   },

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Itim, Fredoka, Quicksand } from "next/font/google";
+import { Inter, Itim, Fredoka } from "next/font/google";
 import "./globals.css";
 
-const quicksand = Quicksand({
-  subsets: ["latin", "vietnamese"],
+const fredoka = Fredoka({
+  subsets: ["latin", "latin-ext"],
   variable: "--font-heading",
   display: "swap",
 });
@@ -18,12 +18,6 @@ const itim = Itim({
   weight: "400",
   subsets: ["latin", "vietnamese"],
   variable: "--font-handwriting",
-  display: "swap",
-});
-
-const fredoka = Fredoka({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-display",
   display: "swap",
 });
 
@@ -44,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${quicksand.variable} ${inter.variable} ${itim.variable} ${fredoka.variable} font-body antialiased`}>
+      <body className={`${fredoka.variable} ${inter.variable} ${itim.variable} font-body antialiased`}>
         {children}
       </body>
     </html>

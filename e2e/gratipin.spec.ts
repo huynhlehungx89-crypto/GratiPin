@@ -33,8 +33,10 @@ test.describe("GratiPin E2E", () => {
 
   test("E2E-01: Trang chủ hiển thị đúng", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "GratiPin" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Tạo công ty mới" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Nơi lưu giữ mọi lời cảm ơn/ })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Tạo bảng ghim miễn phí cho công ty bạn" })
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "Đăng nhập" })).toBeVisible();
   });
 
