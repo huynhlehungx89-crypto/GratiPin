@@ -55,18 +55,38 @@ export async function updateSession(request: NextRequest) {
   if (user && companyMatch) {
     const slug = companyMatch[1];
     if (!reserved.has(slug) && pathname !== "/") {
-      const { data: memberships } = await supabase
+      const { data: memberRow } = await supabase
         .from("members")
-        .select("companies(slug)")
-        .eq("user_id", user.id);
+        .select("is_owner, companies!inner(slug, onboarding_completed)")
+        .eq("user_id", user.id)
+        .eq("companies.slug", slug)
+        .maybeSingle();
 
-      const isMember = memberships?.some((m) => {
-        const company = m.companies as unknown as { slug: string } | null;
-        return company?.slug === slug;
-      });
-
-      if (!isMember) {
+      if (!memberRow) {
         return new NextResponse(null, { status: 404 });
+      }
+
+      const company = memberRow.companies as unknown as {
+        slug: string;
+        onboarding_completed: boolean;
+      };
+
+      const isBoardRoute =
+        pathname === `/${slug}/board` || pathname.startsWith(`/${slug}/board/`);
+      const isSetupRoute = pathname === `/${slug}/setup`;
+
+      if (!company.onboarding_completed && memberRow.is_owner && isBoardRoute) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${slug}/setup`;
+        return NextResponse.redirect(url);
+      }
+
+      if (isSetupRoute) {
+        if (company.onboarding_completed || !memberRow.is_owner) {
+          const url = request.nextUrl.clone();
+          url.pathname = `/${slug}/board`;
+          return NextResponse.redirect(url);
+        }
       }
     }
   }

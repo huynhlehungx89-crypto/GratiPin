@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GratiPin Embed Test</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background: #faf6f0;
+        color: #4a3728;
+      }
+      h1 {
+        margin-top: 0;
+      }
+      .frame-wrap {
+        margin-top: 1.5rem;
+        border: 2px dashed #e8a87c;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        min-height: 600px;
+        border: 0;
+      }
+      code {
+        background: #fff;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+      }
+      p.note {
+        font-size: 0.9rem;
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>GratiPin — Trang nhúng thử (Phase 8.6)</h1>
+    <p>
+      Thay <code>BOARD_ID</code> và <code>EMBED_TOKEN</code> bằng giá trị từ Cài đặt bảng
+      (bật nhúng trước).
+    </p>
+    <p class="note">
+      Mở file này qua dev server: <code>/embed-test.html?board=...&amp;token=...</code>
+    </p>
+    <div class="frame-wrap">
+      <iframe id="embed" title="GratiPin board embed"></iframe>
+    </div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const boardId = params.get("board");
+      const token = params.get("token");
+      const origin = window.location.origin;
+      const iframe = document.getElementById("embed");
+      if (boardId && token) {
+        iframe.src = origin + "/embed/" + boardId + "?token=" + encodeURIComponent(token);
+      } else {
+        iframe.srcdoc =
+          "<p style='padding:2rem;font-family:sans-serif'>Thiếu tham số URL: ?board=UUID&amp;token=...</p>";
+      }
+    </script>
+  </body>
+</html>

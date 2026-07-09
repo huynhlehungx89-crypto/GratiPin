@@ -1,4 +1,5 @@
-import type { BoardSkin, PinTemplate } from "@/lib/utils/board";
+import type { BoardSkin } from "@/lib/utils/board";
+import { normalizePinTemplate } from "@/lib/utils/board";
 import { Board } from "@/components/board/Board";
 import { BoardPinLayer } from "@/components/board/BoardPinLayer";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -46,7 +47,7 @@ export default async function EmbedBoardPage({
     return {
       id: pin.id,
       content: pin.content,
-      template: pin.template as PinTemplate,
+      template: normalizePinTemplate(pin.template),
       image_url: pin.image_url,
       is_anonymous: pin.is_anonymous,
       is_hidden: pin.is_hidden,

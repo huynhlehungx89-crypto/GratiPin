@@ -3,17 +3,36 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import {
+  hasPinContentOrImage,
+  normalizePinContent,
+  PIN_CONTENT_OR_IMAGE_ERROR,
+} from "@/lib/pins/contentValidation";
 import { findOpenPinPosition, randomRotationForTemplate } from "@/lib/pins/placement";
 
-const pinSchema = z.object({
-  companySlug: z.string(),
-  boardId: z.string().uuid(),
-  content: z.string().min(1, "Nội dung không được trống"),
-  template: z.enum(["note", "polaroid", "floral", "washi", "garden", "sunshine", "love"]),
-  isAnonymous: z.boolean(),
-  recipientMemberId: z.string().uuid().optional().nullable(),
-  imageUrl: z.string().url().optional().nullable(),
-});
+const templateEnum = z.enum([
+  "note",
+  "polaroid",
+  "floral",
+  "washi",
+  "garden",
+  "sunshine",
+  "love",
+]);
+
+const pinSchema = z
+  .object({
+    companySlug: z.string(),
+    boardId: z.string().uuid(),
+    content: z.string(),
+    template: templateEnum,
+    isAnonymous: z.boolean(),
+    recipientMemberId: z.string().uuid().optional().nullable(),
+    imageUrl: z.string().url().optional().nullable(),
+  })
+  .refine((data) => hasPinContentOrImage(data.content, data.imageUrl), {
+    message: PIN_CONTENT_OR_IMAGE_ERROR,
+  });
 
 export async function createPin(input: z.infer<typeof pinSchema>) {
   const parsed = pinSchema.safeParse(input);
@@ -72,7 +91,7 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
     author_member_id: member.id,
     is_anonymous: parsed.data.isAnonymous,
     recipient_member_id: parsed.data.recipientMemberId || null,
-    content: parsed.data.content,
+    content: normalizePinContent(parsed.data.content),
     image_url: parsed.data.imageUrl || null,
     template: parsed.data.template,
     position_x: x,
@@ -82,20 +101,25 @@ export async function createPin(input: z.infer<typeof pinSchema>) {
 
   if (error) return { error: error.message };
 
+  revalidatePath(`/${company.slug}`, "layout");
   revalidatePath(`/${company.slug}/board`);
   if (board.department_id) {
-    revalidatePath(`/${company.slug}/board/${board.department_id}`);
+    revalidatePath(`/${company.slug}/board/${board.id}`);
   }
   return { success: true };
 }
 
-const updatePinContentSchema = z.object({
-  companySlug: z.string(),
-  pinId: z.string().uuid(),
-  content: z.string().min(1, "Nội dung không được trống"),
-  template: z.enum(["note", "polaroid", "floral", "washi", "garden", "sunshine", "love"]),
-  imageUrl: z.string().url().optional().nullable(),
-});
+const updatePinContentSchema = z
+  .object({
+    companySlug: z.string(),
+    pinId: z.string().uuid(),
+    content: z.string(),
+    template: templateEnum,
+    imageUrl: z.string().url().optional().nullable(),
+  })
+  .refine((data) => hasPinContentOrImage(data.content, data.imageUrl), {
+    message: PIN_CONTENT_OR_IMAGE_ERROR,
+  });
 
 export async function updatePinContentAction(input: z.infer<typeof updatePinContentSchema>) {
   const parsed = updatePinContentSchema.safeParse(input);
@@ -120,7 +144,7 @@ export async function updatePinContentAction(input: z.infer<typeof updatePinCont
 
   const { error } = await supabase.rpc("update_pin_content", {
     pin_id: parsed.data.pinId,
-    new_content: parsed.data.content,
+    new_content: normalizePinContent(parsed.data.content),
     new_image_url: parsed.data.imageUrl ?? "",
     new_template: parsed.data.template,
   });

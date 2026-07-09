@@ -35,6 +35,13 @@ export const ALL_TEMPLATES: PinTemplate[] = [
   "love",
 ];
 
+export function normalizePinTemplate(value: string | null | undefined): PinTemplate {
+  if (value && ALL_TEMPLATES.includes(value as PinTemplate)) {
+    return value as PinTemplate;
+  }
+  return "note";
+}
+
 const SKIN_STYLES: Record<BoardSkin, string> = {
   wood: "bg-[#c4a574] bg-[radial-gradient(ellipse_at_center,_rgba(139,90,43,0.15)_0%,_transparent_70%)] shadow-inner",
   felt: "bg-[#5c4a5e] bg-[radial-gradient(circle_at_20%_30%,_rgba(255,255,255,0.05)_0%,_transparent_50%)]",

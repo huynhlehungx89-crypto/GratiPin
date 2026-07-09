@@ -64,7 +64,7 @@ async function seedCompany(admin, seed) {
   if (!companyId) {
     const { data: company, error } = await admin
       .from("companies")
-      .insert({ name: seed.name, slug: seed.slug })
+      .insert({ name: seed.name, slug: seed.slug, onboarding_completed: true })
       .select("id")
       .single();
     if (error) throw error;
@@ -86,14 +86,26 @@ async function seedCompany(admin, seed) {
     .eq("user_id", adminUserId)
     .maybeSingle();
 
+  let adminMemberId = existingAdminMember?.id;
+
   if (!existingAdminMember) {
-    const { error } = await admin.from("members").insert({
-      user_id: adminUserId,
-      company_id: companyId,
-      display_name: seed.admin.displayName,
-      role: "admin",
-    });
+    const { data: inserted, error } = await admin
+      .from("members")
+      .insert({
+        user_id: adminUserId,
+        company_id: companyId,
+        display_name: seed.admin.displayName,
+        role: "admin",
+        is_owner: true,
+      })
+      .select("id")
+      .single();
     if (error) throw error;
+    adminMemberId = inserted.id;
+  }
+
+  if (adminMemberId) {
+    await ensureOnboardingFlags(admin, companyId, adminMemberId);
   }
 
   for (const user of seed.users) {
@@ -117,6 +129,17 @@ async function seedCompany(admin, seed) {
   }
 
   console.log(`Seeded: ${seed.name} (${seed.slug})`);
+}
+
+async function ensureOnboardingFlags(admin, companyId, adminMemberId) {
+  await admin
+    .from("companies")
+    .update({ onboarding_completed: true })
+    .eq("id", companyId);
+  await admin
+    .from("members")
+    .update({ is_owner: true })
+    .eq("id", adminMemberId);
 }
 
 async function main() {

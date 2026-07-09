@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { DepartmentsAdmin } from "@/components/admin/DepartmentsAdmin";
-import { getCompanyBySlug } from "@/lib/data/board";
+import { getCompanyBySlug, getCompanyMembers, getCurrentMember } from "@/lib/data/board";
 import { createClient } from "@/lib/supabase/server";
 import type { BoardSkin } from "@/lib/utils/board";
 
@@ -12,14 +12,24 @@ export default async function DepartmentsPage({
   const { data: company } = await getCompanyBySlug(params.companySlug);
   if (!company) notFound();
 
+  const member = await getCurrentMember(company.id);
+  if (!member || member.role !== "admin") notFound();
+
   const supabase = createClient();
+  const { data: companyBoard } = await supabase
+    .from("boards")
+    .select("id")
+    .eq("company_id", company.id)
+    .is("department_id", null)
+    .single();
+
   const { data: departments } = await supabase
     .from("departments")
-    .select("id, name, status, boards(id, skin, embed_enabled, embed_token)")
+    .select("id, name, status, boards(id, skin)")
     .eq("company_id", company.id);
 
   const rows = (departments ?? []).map((d) => {
-    const boards = d.boards as { id: string; skin: string; embed_enabled: boolean; embed_token: string | null }[] | { id: string; skin: string; embed_enabled: boolean; embed_token: string | null } | null;
+    const boards = d.boards as { id: string; skin: string }[] | { id: string; skin: string } | null;
     const board = Array.isArray(boards) ? boards[0] : boards;
     return {
       id: d.id,
@@ -29,7 +39,7 @@ export default async function DepartmentsPage({
     };
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const members = await getCompanyMembers(company.id);
 
   return (
     <main className="mx-auto max-w-6xl p-6">
@@ -37,7 +47,8 @@ export default async function DepartmentsPage({
       <DepartmentsAdmin
         companySlug={params.companySlug}
         departments={rows}
-        baseUrl={baseUrl}
+        members={members.map((m) => ({ id: m.id, display_name: m.display_name }))}
+        companyBoardId={companyBoard!.id}
       />
     </main>
   );

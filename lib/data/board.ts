@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { PinDisplay } from "@/components/pin/PinCard";
-import type { PinTemplate } from "@/lib/utils/board";
+import { normalizePinTemplate } from "@/lib/utils/board";
 
 export async function getCompanyBySlug(slug: string) {
   const supabase = createClient();
@@ -16,7 +16,7 @@ export async function getCurrentMember(companyId: string) {
 
   const { data } = await supabase
     .from("members")
-    .select("id, role, display_name")
+    .select("id, role, display_name, default_board_id")
     .eq("user_id", user.id)
     .eq("company_id", companyId)
     .single();
@@ -64,7 +64,7 @@ export async function getAccessibleBoards(companyId: string, memberId: string, i
 
 export async function getBoardPins(
   boardId: string,
-  isAdmin: boolean
+  showRealAuthor: boolean
 ): Promise<PinDisplay[]> {
   const supabase = createClient();
 
@@ -87,7 +87,7 @@ export async function getBoardPins(
     return {
       id: pin.id,
       content: pin.content,
-      template: pin.template as PinTemplate,
+      template: normalizePinTemplate(pin.template),
       image_url: pin.image_url,
       is_anonymous: pin.is_anonymous,
       is_hidden: pin.is_hidden,
@@ -96,7 +96,7 @@ export async function getBoardPins(
       author_member_id: pin.author_member_id,
       author_real_name: author?.display_name,
       recipient_name: recipient?.display_name ?? null,
-      show_real_author: isAdmin && pin.is_anonymous,
+      show_real_author: showRealAuthor && pin.is_anonymous,
       is_edited: pin.is_edited ?? false,
       edited_at: pin.edited_at ?? null,
       position_x: pin.position_x ?? 0,

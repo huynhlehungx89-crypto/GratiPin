@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { createPin, updatePinContentAction } from "@/lib/actions/pins";
 import { createClient } from "@/lib/supabase/client";
+import {
+  hasPinContentOrImage,
+  normalizePinContent,
+  pinHasText,
+  PIN_CONTENT_OR_IMAGE_ERROR,
+} from "@/lib/pins/contentValidation";
 import { resizeImageFile } from "@/lib/utils/image";
 import { TemplatePicker } from "./TemplatePicker";
 import {
@@ -17,6 +23,9 @@ import type { PinTemplate } from "@/lib/utils/board";
 
 type BoardOption = { id: string; label: string };
 type MemberOption = { id: string; name: string };
+
+const CONTENT_PLACEHOLDER =
+  "Viết lời biết ơn, kỷ niệm... (có thể bỏ trống nếu đã có ảnh)";
 
 export type PinFormProps = {
   mode: "create" | "edit";
@@ -59,6 +68,9 @@ export function PinForm({
   const [hasImage, setHasImage] = useState(!!initial?.imageUrl);
   const [existingImageUrl] = useState(initial?.imageUrl ?? null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(initial?.imageUrl ?? null);
+  const [contentText, setContentText] = useState(initial?.content ?? "");
+
+  const canSubmit = pinHasText(contentText) || hasImage;
 
   useEffect(() => {
     return () => {
@@ -97,13 +109,23 @@ export function PinForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setLoading(true);
 
     const form = new FormData(e.currentTarget);
-    const content = String(form.get("content") ?? "");
+    const content = normalizePinContent(String(form.get("content") ?? ""));
     const imageFile = form.get("image") as File | null;
 
     let imageUrl: string | null = mode === "edit" ? existingImageUrl : null;
+    if (imageFile && imageFile.size > 0) {
+      imageUrl = "pending";
+    }
+
+    if (!hasPinContentOrImage(content, imageUrl)) {
+      setError(PIN_CONTENT_OR_IMAGE_ERROR);
+      return;
+    }
+
+    setLoading(true);
+
     try {
       if (imageFile && imageFile.size > 0) {
         const supabase = createClient();
@@ -119,6 +141,12 @@ export function PinForm({
 
       if (template === "polaroid" && !imageUrl) {
         setError("Cần thêm ảnh để dùng mẫu Polaroid");
+        setLoading(false);
+        return;
+      }
+
+      if (!hasPinContentOrImage(content, imageUrl)) {
+        setError(PIN_CONTENT_OR_IMAGE_ERROR);
         setLoading(false);
         return;
       }
@@ -179,19 +207,7 @@ export function PinForm({
       </h2>
 
       <div className="mb-4">
-        <FormLabel htmlFor="pin-content">Nội dung</FormLabel>
-        <FormTextarea
-          id="pin-content"
-          name="content"
-          required
-          rows={3}
-          defaultValue={initial?.content}
-          placeholder="Viết lời biết ơn, kỷ niệm..."
-        />
-      </div>
-
-      <div className="mb-4">
-        <FormLabel>Ảnh đính kèm</FormLabel>
+        <FormLabel>Ảnh</FormLabel>
         {imagePreviewUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -201,6 +217,18 @@ export function PinForm({
           />
         )}
         <FormFileInput name="image" onChange={handleImageChange} />
+      </div>
+
+      <div className="mb-4">
+        <FormLabel htmlFor="pin-content">Nội dung</FormLabel>
+        <FormTextarea
+          id="pin-content"
+          name="content"
+          rows={3}
+          value={contentText}
+          onChange={(e) => setContentText(e.target.value)}
+          placeholder={CONTENT_PLACEHOLDER}
+        />
       </div>
 
       <div className="mb-4">
@@ -266,11 +294,14 @@ export function PinForm({
         </div>
       )}
 
+      {!canSubmit && !loading && (
+        <p className="mb-3 text-sm text-umber/60">{PIN_CONTENT_OR_IMAGE_ERROR}</p>
+      )}
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !canSubmit}
           className="rounded-full bg-peach px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-peach/90 disabled:opacity-50"
         >
           {loading ? "Đang lưu..." : isEdit ? "Lưu thay đổi" : "Đăng ghim"}

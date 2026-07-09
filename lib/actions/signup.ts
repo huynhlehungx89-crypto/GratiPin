@@ -11,7 +11,7 @@ const signupSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
   password: z.string().min(8, "Mật khẩu tối thiểu 8 ký tự"),
   displayName: z.string().min(1, "Vui lòng nhập tên hiển thị"),
-  logoUrl: z.string().url().optional().or(z.literal("")),
+  logoBase64: z.string().optional(),
 });
 
 export type SignupInput = z.infer<typeof signupSchema>;
@@ -22,7 +22,7 @@ export async function signupCompany(input: SignupInput) {
     return { error: parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ" };
   }
 
-  const { companyName, email, password, displayName, logoUrl } = parsed.data;
+  const { companyName, email, password, displayName, logoBase64 } = parsed.data;
   const baseSlug = slugify(parsed.data.slug?.trim() || companyName);
   const admin = createAdminClient();
   const supabase = createClient();
@@ -49,7 +49,8 @@ export async function signupCompany(input: SignupInput) {
     .insert({
       name: companyName,
       slug,
-      logo_url: logoUrl || null,
+      logo_url: null,
+      onboarding_completed: false,
     })
     .select("id, slug")
     .single();
@@ -58,11 +59,33 @@ export async function signupCompany(input: SignupInput) {
     return { error: companyError.message };
   }
 
+  if (logoBase64?.startsWith("data:image/")) {
+    const [, meta, data] = logoBase64.match(/^data:(image\/\w+);base64,(.+)$/) ?? [];
+    if (meta && data) {
+      const buffer = Buffer.from(data, "base64");
+      const fileName = `logos/${company.id}-${Date.now()}.jpg`;
+      const { error: uploadError } = await admin.storage
+        .from("pin-images")
+        .upload(fileName, buffer, { contentType: meta, upsert: false });
+
+      if (!uploadError) {
+        const { data: publicUrl } = admin.storage
+          .from("pin-images")
+          .getPublicUrl(fileName);
+        await admin
+          .from("companies")
+          .update({ logo_url: publicUrl.publicUrl })
+          .eq("id", company.id);
+      }
+    }
+  }
+
   const { error: memberError } = await admin.from("members").insert({
     user_id: authData.user.id,
     company_id: company.id,
     display_name: displayName,
     role: "admin",
+    is_owner: true,
   });
 
   if (memberError) return { error: memberError.message };

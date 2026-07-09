@@ -3,9 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signupCompany } from "@/lib/actions/signup";
-import { createClient } from "@/lib/supabase/client";
 import { resizeImageFile } from "@/lib/utils/image";
 import { slugify } from "@/lib/utils/slug";
+
+async function fileToBase64(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
@@ -24,18 +32,11 @@ export function SignupForm() {
     const displayName = String(form.get("displayName") ?? "");
     const logoFile = form.get("logo") as File | null;
 
-    let logoUrl = "";
+    let logoBase64: string | undefined;
     try {
       if (logoFile && logoFile.size > 0) {
-        const supabase = createClient();
         const resized = await resizeImageFile(logoFile);
-        const fileName = `logos/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-        const { error: uploadError } = await supabase.storage
-          .from("pin-images")
-          .upload(fileName, resized, { contentType: "image/jpeg" });
-        if (uploadError) throw uploadError;
-        const { data } = supabase.storage.from("pin-images").getPublicUrl(fileName);
-        logoUrl = data.publicUrl;
+        logoBase64 = await fileToBase64(resized);
       }
 
       const result = await signupCompany({
@@ -44,7 +45,7 @@ export function SignupForm() {
         email,
         password,
         displayName,
-        logoUrl: logoUrl || undefined,
+        logoBase64,
       });
 
       if (result.error) {
@@ -53,7 +54,7 @@ export function SignupForm() {
         return;
       }
 
-      window.location.href = `/${result.slug}/board`;
+      window.location.href = `/${result.slug}/setup`;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
       setLoading(false);

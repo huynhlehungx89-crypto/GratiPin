@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import type { PinDisplay } from "./PinCard";
 import { PinCardExport } from "./PinCard";
+import { prepareNodeForExport } from "@/lib/pins/exportCapture";
 
 export function SharePinButton({
   pinId,
@@ -21,19 +22,29 @@ export function SharePinButton({
     if (!ref.current) return;
     setSharing(true);
     try {
-      const dataUrl = await toPng(ref.current, { cacheBust: true, pixelRatio: 2 });
-      const link = document.createElement("a");
-      link.download = `gratipin-${pinId}.png`;
-      link.href = dataUrl;
-      link.click();
+      const restore = prepareNodeForExport(ref.current);
+      try {
+        const dataUrl = await toPng(ref.current, {
+          cacheBust: true,
+          pixelRatio: 2,
+          backgroundColor: "#FBF3E7",
+          fetchRequestInit: { mode: "cors", credentials: "omit" },
+        });
+        const link = document.createElement("a");
+        link.download = `gratipin-${pinId}.png`;
+        link.href = dataUrl;
+        link.click();
 
-      if (navigator.share && navigator.canShare) {
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const file = new File([blob], `gratipin-${pinId}.png`, { type: "image/png" });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "GratiPin" });
+        if (navigator.share && navigator.canShare) {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], `gratipin-${pinId}.png`, { type: "image/png" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: "GratiPin" });
+          }
         }
+      } finally {
+        restore();
       }
     } finally {
       setSharing(false);

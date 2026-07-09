@@ -1,32 +1,32 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import {
-  archiveDepartment,
-  createDepartment,
-  enableBoardEmbed,
-  updateBoardSkin,
-} from "@/lib/actions/admin";
+import { archiveDepartment, createDepartment } from "@/lib/actions/admin";
 import { SKIN_LABELS, type BoardSkin } from "@/lib/utils/board";
 
 type DeptRow = {
   id: string;
   name: string;
   status: string;
-  board: { id: string; skin: BoardSkin; embed_enabled: boolean; embed_token: string | null };
+  board: { id: string; skin: BoardSkin };
 };
+
+type MemberOption = { id: string; display_name: string };
 
 export function DepartmentsAdmin({
   companySlug,
   departments,
-  baseUrl,
+  members,
+  companyBoardId,
 }: {
   companySlug: string;
   departments: DeptRow[];
-  baseUrl: string;
+  members: MemberOption[];
+  companyBoardId: string;
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [embedCode, setEmbedCode] = useState<string | null>(null);
+  const [selectedAdmins, setSelectedAdmins] = useState<string[]>([]);
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +40,7 @@ export function DepartmentsAdmin({
       companySlug,
       name: String(form.get("name")),
       skin,
+      boardAdminMemberIds: selectedAdmins,
     });
     if (result.error) setError(result.error);
     else window.location.reload();
@@ -47,26 +48,49 @@ export function DepartmentsAdmin({
 
   return (
     <div className="space-y-8">
+      <div className="rounded-xl border border-umber/10 bg-white p-4">
+        <h2 className="font-heading text-lg mb-2">Bảng chung công ty</h2>
+        <Link
+          href={`/${companySlug}/board/${companyBoardId}/settings`}
+          className="text-sm text-peach underline"
+        >
+          Cài đặt bảng (skin, embed, Board Admin)
+        </Link>
+      </div>
+
       <form onSubmit={handleCreate} className="rounded-xl border border-umber/10 bg-white p-6">
         <h2 className="font-heading text-lg mb-4">Tạo phòng ban mới</h2>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 mb-4">
           <input name="name" required placeholder="Tên phòng ban" className="rounded-lg border px-3 py-2" />
           <select name="skin" defaultValue="wood" className="rounded-lg border px-3 py-2">
             {(Object.keys(SKIN_LABELS) as BoardSkin[]).map((s) => (
               <option key={s} value={s}>{SKIN_LABELS[s]}</option>
             ))}
           </select>
-          <button type="submit" className="rounded-full bg-peach px-4 py-2 text-white text-sm">Tạo</button>
         </div>
+        <div className="mb-4">
+          <p className="mb-2 text-sm font-medium text-umber">Board Admin (tuỳ chọn)</p>
+          <div className="max-h-32 space-y-1 overflow-y-auto rounded-lg border border-umber/10 p-2">
+            {members.map((m) => (
+              <label key={m.id} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selectedAdmins.includes(m.id)}
+                  onChange={(e) => {
+                    setSelectedAdmins((prev) =>
+                      e.target.checked ? [...prev, m.id] : prev.filter((id) => id !== m.id)
+                    );
+                  }}
+                />
+                {m.display_name}
+              </label>
+            ))}
+          </div>
+        </div>
+        <button type="submit" className="rounded-full bg-peach px-4 py-2 text-white text-sm">Tạo</button>
       </form>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-      {embedCode && (
-        <div className="rounded-xl bg-mint/20 p-4 text-sm">
-          <p className="mb-2 font-medium">Mã nhúng:</p>
-          <code className="block break-all">{embedCode}</code>
-        </div>
-      )}
 
       <div className="space-y-4">
         {departments.map((d) => (
@@ -79,18 +103,12 @@ export function DepartmentsAdmin({
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <select
-                  value={d.board.skin}
-                  onChange={async (e) => {
-                    await updateBoardSkin(companySlug, d.board.id, e.target.value as BoardSkin);
-                    window.location.reload();
-                  }}
-                  className="rounded-lg border px-2 py-1 text-sm"
+                <Link
+                  href={`/${companySlug}/board/${d.board.id}/settings`}
+                  className="text-sm text-peach underline"
                 >
-                  {(Object.keys(SKIN_LABELS) as BoardSkin[]).map((s) => (
-                    <option key={s} value={s}>{SKIN_LABELS[s]}</option>
-                  ))}
-                </select>
+                  Cài đặt bảng
+                </Link>
                 {d.status === "active" && (
                   <button
                     type="button"
@@ -105,21 +123,6 @@ export function DepartmentsAdmin({
                     Giải thể
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="text-sm text-peach underline"
-                  onClick={async () => {
-                    const r = await enableBoardEmbed(companySlug, d.board.id);
-                    if (r.error) alert(r.error);
-                    else if (r.token) {
-                      setEmbedCode(
-                        `<iframe src="${baseUrl}/embed/${d.board.id}?token=${r.token}" width="100%" height="600" frameborder="0"></iframe>`
-                      );
-                    }
-                  }}
-                >
-                  Cho phép nhúng
-                </button>
               </div>
             </div>
           </div>

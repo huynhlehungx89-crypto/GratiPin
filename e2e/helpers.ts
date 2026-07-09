@@ -85,7 +85,7 @@ export async function createCompanyViaApi(opts: {
 
   const { data: company, error: companyError } = await admin
     .from("companies")
-    .insert({ name: opts.name, slug: opts.slug })
+    .insert({ name: opts.name, slug: opts.slug, onboarding_completed: true })
     .select("id, slug")
     .single();
   if (companyError) throw companyError;
@@ -95,6 +95,7 @@ export async function createCompanyViaApi(opts: {
     company_id: company.id,
     display_name: opts.displayName,
     role: "admin",
+    is_owner: false,
   });
   await admin.from("boards").insert({
     company_id: company.id,

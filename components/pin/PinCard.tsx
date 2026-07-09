@@ -11,6 +11,9 @@ import { renderPinVariant } from "./templates/variants";
 
 export type { PinDisplay } from "./PinCard.types";
 
+/** Tạm ẩn chia sẻ — bật lại khi export ổn định trên production */
+const SHARE_BUTTON_ENABLED = false;
+
 export function PinCard({
   pin,
   companyLogoUrl,
@@ -64,11 +67,11 @@ export function PinCard({
             />
           </div>
         )}
-        <div className="mt-1 flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-          {canShare && !pin.is_hidden && (
+        {SHARE_BUTTON_ENABLED && canShare && !pin.is_hidden && (
+          <div className="mt-1 flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
             <SharePinButton pinId={pin.id} pin={pin} companyLogoUrl={companyLogoUrl} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       {viewOpen && (
         <PinModal pin={pin} companyLogoUrl={companyLogoUrl} onClose={() => setViewOpen(false)} />
@@ -100,7 +103,7 @@ export function PinCardExport({
 
   return (
     <div className="relative inline-block bg-cream p-4" id={`pin-export-${pin.id}`}>
-      {renderPinVariant(pin.template, { pin, authorLabel, companyLogoUrl })}
+      {renderPinVariant(pin.template, { pin, authorLabel, companyLogoUrl, forExport: true, compact: true })}
       <p className="mt-2 text-xs text-umber/50">{TEMPLATE_LABELS[pin.template]}</p>
     </div>
   );

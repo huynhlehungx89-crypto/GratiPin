@@ -83,6 +83,24 @@ Làm tuần tự từ Phase 0 → Phase 9, không nhảy cóc. Sau mỗi task, c
 
 ---
 
+## Phase 5.5 — Sửa trải nghiệm bảng ghim (theo phản hồi thực tế sau khi test)
+
+Đây là phase sửa lại phần đã build ở Phase 4-5, không phải làm mới từ đầu. Đọc kỹ `docs/SPEC.md` mục 2.6, 2.6a, 3.5 (đã cập nhật) trước khi làm.
+
+- [ ] 5.5.1 Migration: thêm cột `position_x`, `position_y`, `rotation` vào bảng `pins` (xem `docs/AGENT_RULES.md` mục 4)
+- [ ] 5.5.2 Viết Postgres function `update_pin_position` (SECURITY DEFINER) theo đúng mục 5.1 của `docs/AGENT_RULES.md`, không mở UPDATE chung cho bảng `pins`
+- [ ] 5.5.3 Refactor layout trang board: bảng chiếm full-height/full-width, xoá form inline hiện tại
+- [ ] 5.5.4 Thêm nút FAB góc dưới-phải, bấm vào mở modal chứa form tạo ghim (dùng lại logic form cũ, chỉ đổi chỗ hiển thị)
+- [ ] 5.5.5 Cài `react-draggable`, bọc mỗi `<PinCard>` để kéo-thả tự do trong canvas bảng
+- [ ] 5.5.6 Lúc thả ghim (drag end): gọi RPC `update_pin_position`, debounce để tránh gọi liên tục khi đang kéo
+- [ ] 5.5.7 Lúc tạo ghim mới: tự sinh `position_x/position_y` hợp lý (tránh chồng lên ghim khác trong viewport hiện tại) + `rotation` ngẫu nhiên theo đúng biên độ từng template ở `docs/SPEC.md` mục 3.5
+- [ ] 5.5.8 Thiết kế lại thật sự 4 `<PinCard>` variant theo đúng chi tiết ở `docs/SPEC.md` mục 3.5 (kết cấu nền, khung/viền, trang trí SVG, font riêng, xử lý ảnh riêng từng loại) — không chỉ đổi màu nền
+- [ ] 5.5.9 Validate: template "polaroid" chỉ chọn được khi đã có ảnh đính kèm, disable + tooltip giải thích nếu chưa có ảnh
+- [ ] 5.5.10 Canvas bảng cho phép cuộn ngang/dọc khi nội dung vượt viewport
+- [ ] 5.5.11 Commit — báo cáo: bảng full-screen đúng, FAB + modal hoạt động, kéo-thả lưu được vị trí, 4 template nhìn khác biệt rõ rệt (đính kèm ảnh chụp lại nếu được)
+
+---
+
 ## Phase 6 — Kiểm duyệt (Admin)
 
 - [ ] 6.1 Trang `/[companySlug]/admin/pins`: danh sách toàn bộ pin (kể cả ẩn danh — hiện tên thật cho admin), lọc theo board
