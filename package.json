@@ -9,6 +9,7 @@
     "lint": "next lint",
     "db:migrate": "node scripts/run-migration.mjs",
     "db:seed": "node scripts/seed.mjs",
+    "db:platform-admin": "node scripts/ensure-platform-admin.mjs",
     "db:types": "node scripts/gen-types.mjs",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report e2e-report"
